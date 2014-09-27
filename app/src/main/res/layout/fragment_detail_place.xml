@@ -1,0 +1,59 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <ImageView
+            android:id="@+id/placeDetailImageView"
+            android:adjustViewBounds="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="168dp"
+            tools:context="ch.marcbaechinger.whereihavebeen.app.PlaceDetailActivity.PlaceDetailFragment">
+
+            <TextView
+                android:id="@+id/placeDetailDescription"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:padding="32dp"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textAllCaps="true"
+                android:shadowColor="@color/black"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="1"/>
+            <TextView
+                android:id="@+id/placeDetailLat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/placeDetailDescription" />
+
+            <TextView
+                android:id="@+id/placeDetailCoordDelimiter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/placeDetailDescription"
+                android:layout_toRightOf="@+id/placeDetailLat"
+                android:text=" - " />
+
+            <TextView
+                android:id="@+id/placeDetailLng"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/placeDetailDescription"
+                android:layout_toRightOf="@+id/placeDetailCoordDelimiter" />
+
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+</ScrollView>

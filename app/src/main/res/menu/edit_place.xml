@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity" >
+
+    <item android:id="@+id/action_addPicture"
+        android:title="@string/action_addPicture"
+        android:icon="@drawable/ic_action_photo"
+        android:orderInCategory="100"
+        android:showAsAction="always" />
+</menu>

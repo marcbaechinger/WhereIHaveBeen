@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="app.ch.marcbaechinger.whereihavebeen" >
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="ch.marcbaechinger.whereihavebeen.app.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="ch.marcbaechinger.whereihavebeen.app.data.PlacesContentProvider"
+            android:authorities="ch.marcbaechinger.whereihavebeen.provider" />
+
+        <activity
+            android:name="ch.marcbaechinger.whereihavebeen.app.PlaceDetailActivity"
+            android:label="@string/title_activity_places"
+            android:parentActivityName="ch.marcbaechinger.whereihavebeen.app.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.marcbaechinger.whereihavebeen.app.MainActivity" />
+        </activity>
+        <activity
+            android:name="ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity"
+            android:label=""
+            android:parentActivityName="ch.marcbaechinger.whereihavebeen.app.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.marcbaechinger.whereihavebeen.app.MainActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="ch.marcbaechinger.whereihavebeen.app.AddFriendActivity"
+            android:label="@string/title_activity_add_friend" >
+        </activity>
+    </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS"/>
+</manifest>
