@@ -27,7 +27,7 @@ public class ImageUtility {
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
         return image;
     }
-    
+
     public static void setBitmapFromUri(Uri uri, ImageView imageView, Context context) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor =
                 context.getContentResolver().openFileDescriptor(uri, "r");

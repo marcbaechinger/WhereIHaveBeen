@@ -12,12 +12,14 @@ public class PlacesContentProvider extends ContentProvider {
 
     public static final int PLACE = 100;
     public static final int PLACE_ID = 101;
+    public static final int CATEGORY = 200;
 
     public static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
         URI_MATCHER.addURI(DataContract.AUTHORITY, DataContract.PLACE.PATH, PLACE);
         URI_MATCHER.addURI(DataContract.AUTHORITY, DataContract.PLACE.PATH + "/#", PLACE_ID);
+        URI_MATCHER.addURI(DataContract.AUTHORITY, DataContract.CATEGORY.PATH, CATEGORY);
     }
 
     private DatabaseHelper dbHelper;
@@ -33,11 +35,17 @@ public class PlacesContentProvider extends ContentProvider {
         int match = URI_MATCHER.match(uri);
         switch (match) {
             case PLACE:
-                return queryForAllPlaces(projection, sortOrder);
+                return queryForAllPlaces(selectionArgs);
             case PLACE_ID:
                 return queryForSinglePlace(uri, projection, sortOrder);
+            case CATEGORY:
+                return queryForAllCategories(projection, sortOrder);
         }
         return null;
+    }
+
+    private Cursor queryForAllCategories(String[] projection, String sortOrder) {
+        return dbHelper.getWritableDatabase().query(DataContract.CATEGORY.TABLE, projection, null, null, null, null, sortOrder);
     }
 
     private Cursor queryForSinglePlace(Uri uri, String[] projection, String sortOrder) {
@@ -47,8 +55,12 @@ public class PlacesContentProvider extends ContentProvider {
         return dbHelper.getReadableDatabase().query(DataContract.PLACE.TABLE, projection, selection, selectionArgs, null, null, sortOrder);
     }
 
-    private Cursor queryForAllPlaces(String[] projection, String sortOrder) {
-        return dbHelper.getWritableDatabase().query(DataContract.PLACE.TABLE, projection, null, null, null, null, sortOrder);
+    private Cursor queryForAllPlaces(String[] selectionArgs) {
+        String category = null;
+        if (selectionArgs != null && selectionArgs.length == 1) {
+            category = selectionArgs[0];
+        }
+        return dbHelper.getWritableDatabase().rawQuery(DatabaseHelper.getSelectPlaceQuery(category), null);
     }
 
     @Override

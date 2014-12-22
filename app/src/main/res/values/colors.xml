@@ -14,4 +14,9 @@
     <color name="orange">#FADCA7</color>
     <color name="yellow">#EEFF41</color>
     <color name="default_background">#3d3d3d</color>
+
+    <color name="wihbPrimaryColorDark">#5a0008</color>
+    <color name="wihbTextColor">#333</color>
+    <color name="wihbPrimaryColor">#86000c</color>
+    <color name="wihbTextColorPrimary">#fff</color>
 </resources>

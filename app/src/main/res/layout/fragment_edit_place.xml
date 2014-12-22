@@ -4,7 +4,8 @@
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="32dp"
+    android:padding="0dp"
+    android:layout_marginTop="62dp"
     tools:context="ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity.EditPlaceFragment">
 
     <RelativeLayout
@@ -15,38 +16,40 @@
 
         <EditText
             android:id="@+id/createEditTitle"
+            android:textColor="#333333"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="32dp"
+            android:paddingLeft="6dp"
+            android:textSize="24dp"
             android:hint="@string/placeTitlePlaceholder" />
 
-        <EditText
-            android:id="@+id/createEditDescription"
-            android:layout_width="wrap_content"
+        <Spinner
+            android:id="@+id/createEditCategory"
+            android:layout_below="@id/createEditTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/createEditTitle"
-            android:hint="@string/placeLabelPlaceholder"
-            android:ems="10"
-            android:textSize="24dp"
-            android:inputType="textMultiLine" />
+            android:textSize="32dp"/>
+
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/mapFragment"
+            android:layout_below="@id/createEditCategory"
+            android:layout_width="match_parent"
+            android:layout_height="320dp"
+            android:name="com.google.android.gms.maps.MapFragment"/>
+
 
         <FrameLayout
             android:id="@+id/createImageLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/createEditDescription">
+            android:layout_below="@+id/mapFragment">
 
             <ImageView
                 android:id="@+id/createImage"
                 android:adjustViewBounds="true"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/createEditDescription" />
+                android:layout_below="@+id/map" />
         </FrameLayout>
 
         <Button
@@ -55,8 +58,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/createImageLayout"
             android:text="@string/button_save"
-            android:elevation="42dp"
             android:layout_marginTop="42dp"
+            android:elevation="12dp"
             android:background="@drawable/background" />
 
 

@@ -16,6 +16,7 @@ import android.widget.SimpleCursorAdapter;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.PlaceAdapter;
+import ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity;
 import ch.marcbaechinger.whereihavebeen.app.PlaceDetailActivity;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.swipe.SwipeDismissListViewTouchListener;
@@ -24,25 +25,36 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final String[] PROJECTION = new String[]{
             DataContract.PLACE.FIELD_ID,
-            DataContract.PLACE.FIELD_TITLE,
+            DataContract.PLACE.TABLE + "." + DataContract.PLACE.FIELD_TITLE,
             DataContract.PLACE.FIELD_DESCRIPTION,
-            DataContract.PLACE.FIELD_PICTURE
+            DataContract.PLACE.FIELD_PICTURE,
+            DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_TITLE,
+            DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_COLOR
     };
 
     private SimpleCursorAdapter listViewAdapter;
+    private String selectedCategoryTitle = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] fields = {DataContract.PLACE.FIELD_PICTURE, DataContract.PLACE.FIELD_TITLE};
-        int[] views = {R.id.placeListViewItemImage, R.id.placeListViewItemTitle};
+        String[] fields = {DataContract.PLACE.FIELD_PICTURE, DataContract.PLACE.FIELD_TITLE, DataContract.CATEGORY.FIELD_TITLE, DataContract.CATEGORY.FIELD_COLOR};
+        int[] views = {R.id.placeListViewItemImage, R.id.placeListViewItemTitle, R.id.placeListViewItemCategory};
 
         listViewAdapter = new PlaceAdapter(getActivity(),
                 R.layout.place_list_item, null,
                 fields,
                 views, 0);
+
+        rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent createIntent = new Intent(getActivity(), EditPlaceActivity.class);
+                startActivity(createIntent);
+            }
+        });
 
         ListView placesListView = (ListView) rootView.findViewById(R.id.placesListView);
         placesListView.setAdapter(listViewAdapter);
@@ -51,6 +63,7 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long index) {
                 Intent detailIntent = new Intent(getActivity(), PlaceDetailActivity.class);
                 detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(pos));
+                detailIntent.putExtra("category", view.getTag(R.id.categoryTitle).toString());
                 startActivity(detailIntent);
             }
         });
@@ -71,14 +84,13 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
                                     if (cursor.moveToPosition(reverseSortedPositions[0])) {
                                         String id = cursor.getString(cursor.getColumnIndex(DataContract.PLACE.FIELD_ID));
                                         getActivity().getContentResolver().delete(
-                                            DataContract.PLACE.CONTENT_URI,
-                                            DataContract.PLACE.FIELD_ID + " = ?",
-                                            new String[]{id}
+                                                DataContract.PLACE.CONTENT_URI,
+                                                DataContract.PLACE.FIELD_ID + " = ?",
+                                                new String[]{id}
                                         );
                                         getLoaderManager().restartLoader(0, null, PlacesFragment.this);
                                     }
                                 }
-                                //®listViewAdapter.notifyDataSetChanged();
                             }
                         });
         placesListView.setOnTouchListener(touchListener);
@@ -92,8 +104,12 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        String[] selectionArgs = null;
+        if (selectedCategoryTitle != null) {
+            selectionArgs = new String[]{selectedCategoryTitle};
+        }
         return new CursorLoader(getActivity(), DataContract.PLACE.CONTENT_URI,
-                PROJECTION, null, null, null);
+                PROJECTION, null, selectionArgs, null);
     }
 
     @Override
@@ -104,5 +120,15 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         listViewAdapter.swapCursor(null);
+    }
+
+    public void setCategoryTitle(String title) {
+        if (selectedCategoryTitle != null && title == null) {
+            selectedCategoryTitle = title;
+            getLoaderManager().restartLoader(0, null, this);
+        } else if (title != null && (selectedCategoryTitle == null || !selectedCategoryTitle.equals(title))) {
+            selectedCategoryTitle = title;
+            getLoaderManager().restartLoader(0, null, this);
+        }
     }
 }

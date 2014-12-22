@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toolbar;
+
+import com.google.android.gms.maps.GoogleMap;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.fragments.EditPlaceFragment;
@@ -13,6 +16,7 @@ import ch.marcbaechinger.whereihavebeen.fragments.ImageUtility;
 public class EditPlaceActivity extends Activity {
 
     private static final String TAG = ImageUtility.class.getName();
+    private GoogleMap mMap;
 
 
     @Override
@@ -24,7 +28,10 @@ public class EditPlaceActivity extends Activity {
                     .add(R.id.container, new EditPlaceFragment())
                     .commit();
         }
+
+        setActionBar((Toolbar) findViewById(R.id.toolbar));
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

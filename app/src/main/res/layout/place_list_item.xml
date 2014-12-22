@@ -6,17 +6,42 @@
     android:orientation="horizontal"
     xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <ImageView
-        android:id="@+id/placeListViewItemImage"
-        android:layout_width="82dp"
-        android:layout_height="82dp" />
+    <RelativeLayout
+        android:layout_width="94dp"
+        android:layout_height="78dp">
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/placeListViewItemTitle"
+        <ImageView
+            android:id="@+id/placeListViewItemImage"
+            android:layout_width="82dp"
+            android:layout_height="82dp"
+            android:layout_centerInParent="true"
+            android:padding="4dp"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="32dp"
-        android:padding="16dp"/>
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/placeListViewItemTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24dp"
+            android:singleLine="true"
+            android:layout_marginLeft="16px"
+            android:layout_marginTop="20px"
+            android:layout_marginBottom="8px"/>
+
+        <TextView
+            android:id="@+id/placeListViewItemCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:textSize="12dp"
+            style="@style/CategoryLabel"
+            />
+
+    </LinearLayout>
 
 </LinearLayout>

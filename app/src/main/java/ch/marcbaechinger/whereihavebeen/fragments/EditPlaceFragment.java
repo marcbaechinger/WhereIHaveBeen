@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -15,18 +16,25 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
+
+import com.google.android.gms.maps.GoogleMap;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.app.MainActivity;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
+import ch.marcbaechinger.whereihavebeen.app.data.DatabaseHelper;
 
 public class EditPlaceFragment extends Fragment {
 
@@ -34,6 +42,8 @@ public class EditPlaceFragment extends Fragment {
     private static final String TAG = EditPlaceFragment.class.getName();
 
     private Uri imageUri;
+    private GoogleMap mMap;
+    private Map<String, Integer> categoryKeyMap = new HashMap<String, Integer>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,24 +53,30 @@ public class EditPlaceFragment extends Fragment {
         setHasOptionsMenu(true);
 
         Intent intent = getActivity().getIntent();
-        final EditText description = (EditText) rootView.findViewById(R.id.createEditDescription);
         final EditText title = (EditText) rootView.findViewById(R.id.createEditTitle);
         if (intent.getExtras() != null) {
             String subject = intent.getExtras().getString(Intent.EXTRA_SUBJECT);
             title.setText(subject);
             String text = intent.getExtras().getString(Intent.EXTRA_TEXT);
-            description.setText(text);
         }
+
+        final Spinner categories = (Spinner) rootView.findViewById(R.id.createEditCategory);
+        loadCategories();
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
+                R.layout.spinner_item, new ArrayList<String>(categoryKeyMap.keySet()));
+        dataAdapter.setDropDownViewResource(R.layout.spinner);
+        categories.setAdapter(dataAdapter);
+
         Button saveButton = (Button) rootView.findViewById(R.id.createButtonSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(DataContract.PLACE.FIELD_TITLE, title.getText().toString());
-                contentValues.put(DataContract.PLACE.FIELD_DESCRIPTION, description.getText().toString());
                 if (imageUri != null) {
                     contentValues.put(DataContract.PLACE.FIELD_PICTURE, imageUri.toString());
                 }
+                contentValues.put(DataContract.PLACE.FIELD_CATEGORY, categoryKeyMap.get(categories.getSelectedItem().toString()));
                 getActivity().getContentResolver().insert(DataContract.PLACE.CONTENT_URI, contentValues);
 
                 Intent backIntent = new Intent(getActivity(), MainActivity.class);
@@ -70,6 +86,52 @@ public class EditPlaceFragment extends Fragment {
 
         return rootView;
     }
+
+    private void loadCategories() {
+        if (categoryKeyMap.isEmpty()) {
+            // database handler
+            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+            List<String> labels = new ArrayList<String>();
+            Cursor cursor = dbHelper.getWritableDatabase().query(DataContract.CATEGORY.TABLE, null, null, null, null, null, null);
+
+            try {
+                int titleIdx = cursor.getColumnIndex(DataContract.CATEGORY.FIELD_TITLE);
+                int idIdx = cursor.getColumnIndex(DataContract.CATEGORY.FIELD_ID);
+                if (cursor.moveToFirst()) {
+                    categoryKeyMap.put(cursor.getString(titleIdx), cursor.getInt(idIdx));
+                    while (cursor.moveToNext()) {
+                        categoryKeyMap.put(cursor.getString(titleIdx), cursor.getInt(idIdx));
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setUpMapIfNeeded();
+    }
+
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            View view = getView().findViewById(R.id.mapFragment);
+            // Try to obtain the map from the SupportMapFragment.
+            /*mMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.mapFragment)).getMap();
+            // Check if we were successful in obtaining the map.
+            if (mMap != null) {
+                setUpMap();
+            }*/
+        }
+    }
+
+    private void setUpMap() {
+
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
