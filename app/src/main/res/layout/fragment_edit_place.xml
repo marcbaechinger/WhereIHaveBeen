@@ -30,19 +30,12 @@
             android:layout_height="wrap_content"
             android:textSize="32dp"/>
 
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/mapFragment"
-            android:layout_below="@id/createEditCategory"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:name="com.google.android.gms.maps.MapFragment"/>
-
 
         <FrameLayout
             android:id="@+id/createImageLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/mapFragment">
+            android:layout_below="@+id/createEditCategory">
 
             <ImageView
                 android:id="@+id/createImage"

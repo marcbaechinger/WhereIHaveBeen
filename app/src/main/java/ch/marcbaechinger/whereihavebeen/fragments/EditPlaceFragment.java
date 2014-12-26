@@ -22,8 +22,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import com.google.android.gms.maps.GoogleMap;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,8 +40,8 @@ public class EditPlaceFragment extends Fragment {
     private static final String TAG = EditPlaceFragment.class.getName();
 
     private Uri imageUri;
-    private GoogleMap mMap;
-    private Map<String, Integer> categoryKeyMap = new HashMap<String, Integer>();
+    //private GoogleMap mMap;
+    private Map<String, Integer> categoryKeyMap = new HashMap<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,7 +61,7 @@ public class EditPlaceFragment extends Fragment {
         final Spinner categories = (Spinner) rootView.findViewById(R.id.createEditCategory);
         loadCategories();
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.spinner_item, new ArrayList<String>(categoryKeyMap.keySet()));
+                R.layout.spinner_item, new ArrayList<>(categoryKeyMap.keySet()));
         dataAdapter.setDropDownViewResource(R.layout.spinner);
         categories.setAdapter(dataAdapter);
 
@@ -112,10 +110,10 @@ public class EditPlaceFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
+        //setUpMapIfNeeded();
     }
 
-    private void setUpMapIfNeeded() {
+    /*private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             View view = getView().findViewById(R.id.mapFragment);
@@ -124,13 +122,13 @@ public class EditPlaceFragment extends Fragment {
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 setUpMap();
-            }*/
+            }* /
         }
     }
-
     private void setUpMap() {
 
-    }
+    }*/
+
 
 
     @Override
