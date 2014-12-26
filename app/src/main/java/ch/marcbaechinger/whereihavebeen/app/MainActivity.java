@@ -27,8 +27,6 @@ public class MainActivity extends Activity {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private CharSequence mTitle;
-    private CharSequence mDrawerTitle;
-    private String[] drawerItems;
     private ActionBarDrawerToggle mDrawerToggle;
     private CategoryAdapter categoryAdapter;
 
@@ -51,7 +49,6 @@ public class MainActivity extends Activity {
 
 
         mTitle = getString(R.string.all_categories);
-        mDrawerTitle = getTitle();
         setTitle(mTitle);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -61,8 +58,6 @@ public class MainActivity extends Activity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         leftDrawer = findViewById(R.id.left_drawer);
         mDrawerList = (ListView) findViewById(R.id.categoryList);
-
-        drawerItems = getResources().getStringArray(R.array.drawer_items);
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
