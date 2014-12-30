@@ -12,13 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.PlaceAdapter;
 import ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity;
 import ch.marcbaechinger.whereihavebeen.app.PlaceDetailActivity;
+import ch.marcbaechinger.whereihavebeen.app.UIModel;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
+import ch.marcbaechinger.whereihavebeen.model.Category;
+import ch.marcbaechinger.whereihavebeen.model.Place;
 import ch.marcbaechinger.whereihavebeen.swipe.SwipeDismissListViewTouchListener;
 
 public class PlacesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>  {
@@ -32,13 +34,14 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_COLOR
     };
 
-    private SimpleCursorAdapter listViewAdapter;
-    private String selectedCategoryTitle = null;
+    private PlaceAdapter listViewAdapter;
+    private UIModel model;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        model = UIModel.instance(getActivity());
 
         String[] fields = {DataContract.PLACE.FIELD_PICTURE, DataContract.PLACE.FIELD_TITLE, DataContract.CATEGORY.FIELD_TITLE, DataContract.CATEGORY.FIELD_COLOR};
         int[] views = {R.id.placeListViewItemImage, R.id.placeListViewItemTitle, R.id.placeListViewItemCategory};
@@ -52,6 +55,7 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onClick(View v) {
                 Intent createIntent = new Intent(getActivity(), EditPlaceActivity.class);
+                model.setEditPlace(new Place());
                 startActivity(createIntent);
             }
         });
@@ -63,8 +67,9 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long index) {
                 Intent detailIntent = new Intent(getActivity(), PlaceDetailActivity.class);
                 detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(pos));
-                detailIntent.putExtra("category", view.getTag(R.id.categoryTitle).toString());
+                model.setSelectedPlace((Place) view.getTag(R.id.placeTag));
                 startActivity(detailIntent);
+                getActivity().overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
             }
         });
 
@@ -105,8 +110,9 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         String[] selectionArgs = null;
-        if (selectedCategoryTitle != null) {
-            selectionArgs = new String[]{selectedCategoryTitle};
+        Category category = UIModel.instance(getActivity()).getSelectedCategory();
+        if (category != null) {
+            selectionArgs = new String[]{category.getTitle()};
         }
         return new CursorLoader(getActivity(), DataContract.PLACE.CONTENT_URI,
                 PROJECTION, null, selectionArgs, null);
@@ -123,11 +129,15 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void setCategoryTitle(String title) {
-        if (selectedCategoryTitle != null && title == null) {
-            selectedCategoryTitle = title;
+        Category category = UIModel.instance(getActivity()).getSelectedCategory();
+        if (category == null) {
+            UIModel.instance(getActivity()).setSelectedCategoryByTitle(title);
             getLoaderManager().restartLoader(0, null, this);
-        } else if (title != null && (selectedCategoryTitle == null || !selectedCategoryTitle.equals(title))) {
-            selectedCategoryTitle = title;
+        } else if (title == null) {
+            UIModel.instance(getActivity()).setSelectedCategory(null);
+            getLoaderManager().restartLoader(0, null, this);
+        } else if (title != null && (category == null || !category.getTitle().equals(title))) {
+            UIModel.instance(getActivity()).setSelectedCategoryByTitle(title);
             getLoaderManager().restartLoader(0, null, this);
         }
     }

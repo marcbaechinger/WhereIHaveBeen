@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="background_gradient_start">#000000</color>
     <color name="background_gradient_end">#DDDDDD</color>
     <color name="fastlane_background">#0096a6</color>
@@ -14,9 +16,15 @@
     <color name="orange">#FADCA7</color>
     <color name="yellow">#EEFF41</color>
     <color name="default_background">#3d3d3d</color>
-
     <color name="wihbPrimaryColorDark">#5a0008</color>
     <color name="wihbTextColor">#333</color>
     <color name="wihbPrimaryColor">#86000c</color>
     <color name="wihbTextColorPrimary">#fff</color>
+    <color name="bottomButtonBar">#dddddd</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="whiteTransparent">#bbffffff</color>
+    <color name="wihbSecondaryFab">#999999</color>
+
+    <color name="locationBackground">#333333</color>
+    <color name="locationTextColor">#ffffff</color>
 </resources>

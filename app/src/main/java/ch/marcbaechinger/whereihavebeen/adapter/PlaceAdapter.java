@@ -18,6 +18,7 @@ import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.actions.BitmapCropAction;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.model.Category;
+import ch.marcbaechinger.whereihavebeen.model.Place;
 
 public class PlaceAdapter extends SimpleCursorAdapter {
 
@@ -36,24 +37,51 @@ public class PlaceAdapter extends SimpleCursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView title = (TextView) view.findViewById(R.id.placeListViewItemTitle);
-        int titleFieldIdx = cursor.getColumnIndex(DataContract.PLACE.FIELD_TITLE);
-        title.setText(cursor.getString(titleFieldIdx));
+        Place place = createPlace(cursor);
+        view.setTag(R.id.placeTag, place);
 
-        Category category = fetchCategory(cursor);
+        TextView title = (TextView) view.findViewById(R.id.placeListViewItemTitle);
+        title.setText(place.getTitle());
+
         TextView categoryView = (TextView) view.findViewById(R.id.placeListViewItemCategory);
 
         GradientDrawable background = (GradientDrawable) categoryView.getBackground();
-        background.setColor(Color.parseColor(category.getColor()));
-        categoryView.setText(category.getTitle());
-        view.setTag(R.id.categoryTitle, category.getTitle());
+        background.setColor(Color.parseColor(place.getCategory().getColor()));
+        categoryView.setText(place.getCategory().getTitle());
+
+        if (place.getPictureUri() != null) {
+            ImageView image = (ImageView) view.findViewById(R.id.placeListViewItemImage);
+            new BitmapCropAction(image, context).execute(place.getPictureUri());
+        }
+    }
+
+    private Place createPlace(Cursor cursor) {
+        Place place = new Place();
+
+        int titleIdx = cursor.getColumnIndex(DataContract.PLACE.FIELD_TITLE);
+        place.setTitle(cursor.getString(titleIdx));
+
+        int descIdx = cursor.getColumnIndex(DataContract.PLACE.FIELD_DESCRIPTION);
+        place.setDescription(cursor.getString(descIdx));
+
+        int idIdx = cursor.getColumnIndex(DataContract.PLACE.FIELD_ID);
+        place.setId(cursor.getInt(idIdx));
+
+        int latIdx = cursor.getColumnIndex(DataContract.PLACE.FIELD_LAT);
+        place.setLat(cursor.getDouble(latIdx));
+
+        int lngIdx = cursor.getColumnIndex(DataContract.PLACE.FIELD_LNG);
+        place.setLng(cursor.getDouble(lngIdx));
 
         int pictureUriIndex = cursor.getColumnIndex(DataContract.PLACE.FIELD_PICTURE);
-        String pictureUri = cursor.getString(pictureUriIndex);
-        if (pictureUri != null) {
-            ImageView image = (ImageView) view.findViewById(R.id.placeListViewItemImage);
-            new BitmapCropAction(image, context).execute(pictureUri);
+        place.setPictureUri(cursor.getString(pictureUriIndex));
+
+        Category category = fetchCategory(cursor);
+        if (category != null) {
+            place.setCategory(category);
         }
+
+        return place;
     }
 
 

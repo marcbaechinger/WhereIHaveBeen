@@ -1,12 +1,14 @@
 package ch.marcbaechinger.whereihavebeen.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -16,23 +18,27 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
+import ch.marcbaechinger.whereihavebeen.adapter.CategorySelectionAdapter;
 import ch.marcbaechinger.whereihavebeen.app.MainActivity;
+import ch.marcbaechinger.whereihavebeen.app.MapActivity;
+import ch.marcbaechinger.whereihavebeen.app.UIModel;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
-import ch.marcbaechinger.whereihavebeen.app.data.DatabaseHelper;
+import ch.marcbaechinger.whereihavebeen.model.Category;
+import ch.marcbaechinger.whereihavebeen.model.Place;
 
 public class EditPlaceFragment extends Fragment {
 
@@ -40,13 +46,19 @@ public class EditPlaceFragment extends Fragment {
     private static final String TAG = EditPlaceFragment.class.getName();
 
     private Uri imageUri;
-    //private GoogleMap mMap;
-    private Map<String, Integer> categoryKeyMap = new HashMap<>();
+    private TextView categoryLabel;
+    private ListView categoryList;
+
+    private TextView latView;
+    private TextView lngView;
+    private UIModel model;
+    private View locationRow;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_edit_place, container, false);
+        model = UIModel.instance(getActivity());
 
         setHasOptionsMenu(true);
 
@@ -55,81 +67,113 @@ public class EditPlaceFragment extends Fragment {
         if (intent.getExtras() != null) {
             String subject = intent.getExtras().getString(Intent.EXTRA_SUBJECT);
             title.setText(subject);
-            String text = intent.getExtras().getString(Intent.EXTRA_TEXT);
         }
 
-        final Spinner categories = (Spinner) rootView.findViewById(R.id.createEditCategory);
-        loadCategories();
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.spinner_item, new ArrayList<>(categoryKeyMap.keySet()));
-        dataAdapter.setDropDownViewResource(R.layout.spinner);
-        categories.setAdapter(dataAdapter);
+        setupCategorySelectionUi(rootView);
 
-        Button saveButton = (Button) rootView.findViewById(R.id.createButtonSave);
+        ImageButton saveButton = (ImageButton) rootView.findViewById(R.id.createButtonSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(DataContract.PLACE.FIELD_TITLE, title.getText().toString());
-                if (imageUri != null) {
-                    contentValues.put(DataContract.PLACE.FIELD_PICTURE, imageUri.toString());
-                }
-                contentValues.put(DataContract.PLACE.FIELD_CATEGORY, categoryKeyMap.get(categories.getSelectedItem().toString()));
-                getActivity().getContentResolver().insert(DataContract.PLACE.CONTENT_URI, contentValues);
+                save(title, model);
 
                 Intent backIntent = new Intent(getActivity(), MainActivity.class);
                 startActivity(backIntent);
             }
         });
 
+        locationRow = rootView.findViewById(R.id.location_row);
+        locationRow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startMapActivity();
+            }
+        });
+        latView = (TextView)rootView.findViewById(R.id.latitude);
+        lngView = (TextView)rootView.findViewById(R.id.longitude);
+
+        if (model.getSelectedCategory()!= null) {
+            selectCategory(model.getSelectedCategory());
+            categoryLabel.setVisibility(View.VISIBLE);
+            UIUtils.setListViewHeight(categoryList, 0);
+        } else {
+            UIUtils.setListViewHeight(categoryList, UIUtils.calculateTotalListHeight(categoryList));
+        }
+
         return rootView;
     }
 
-    private void loadCategories() {
-        if (categoryKeyMap.isEmpty()) {
-            // database handler
-            DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-            List<String> labels = new ArrayList<String>();
-            Cursor cursor = dbHelper.getWritableDatabase().query(DataContract.CATEGORY.TABLE, null, null, null, null, null, null);
-
-            try {
-                int titleIdx = cursor.getColumnIndex(DataContract.CATEGORY.FIELD_TITLE);
-                int idIdx = cursor.getColumnIndex(DataContract.CATEGORY.FIELD_ID);
-                if (cursor.moveToFirst()) {
-                    categoryKeyMap.put(cursor.getString(titleIdx), cursor.getInt(idIdx));
-                    while (cursor.moveToNext()) {
-                        categoryKeyMap.put(cursor.getString(titleIdx), cursor.getInt(idIdx));
-                    }
-                }
-            } finally {
-                cursor.close();
+    private void setupCategorySelectionUi(View rootView) {
+        categoryLabel = (TextView) rootView.findViewById(R.id.categoryLabel);
+        categoryLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UIUtils.setListViewHeight(categoryList, UIUtils.calculateTotalListHeight(categoryList));
+                categoryLabel.setVisibility(View.GONE);
             }
+        });
+
+
+        categoryList = (ListView) rootView.findViewById(R.id.categoryList);
+
+        final ListAdapter adapter = new CategorySelectionAdapter(getActivity(),
+                R.layout.category_selection_list_item,
+                new ArrayList<>(model.getCategories()));
+        categoryList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                UIUtils.setListViewHeight(categoryList, 0);
+                categoryLabel.setVisibility(View.VISIBLE);
+                selectCategory((Category) adapter.getItem(position));
+                categoryList.setSelection(position);
+            }
+        });
+        categoryList.setAdapter(adapter);
+    }
+
+    private void save(EditText title, UIModel uiModel) {
+        ContentValues contentValues = new ContentValues();
+        Place editPlace = uiModel.getEditPlace();
+
+        contentValues.put(DataContract.PLACE.FIELD_TITLE, title.getText().toString());
+        if (imageUri != null) {
+            contentValues.put(DataContract.PLACE.FIELD_PICTURE, imageUri.toString());
         }
+        contentValues.put(DataContract.PLACE.FIELD_CATEGORY, editPlace.getCategory().getId());
+
+        if (editPlace.getLat() != null) {
+            contentValues.put(DataContract.PLACE.FIELD_LAT, editPlace.getLat());
+        }
+        if (editPlace.getLng() != null) {
+            contentValues.put(DataContract.PLACE.FIELD_LNG, editPlace.getLng());
+        }
+
+        getActivity().getContentResolver().insert(DataContract.PLACE.CONTENT_URI, contentValues);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        //setUpMapIfNeeded();
+    public void onStart() {
+        super.onStart();
+        updateLatLng();
     }
 
-    /*private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
-            View view = getView().findViewById(R.id.mapFragment);
-            // Try to obtain the map from the SupportMapFragment.
-            /*mMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.mapFragment)).getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-                setUpMap();
-            }* /
+    private void updateLatLng() {
+        if (model.getEditPlace().getLat() != null) {
+            latView.setText(model.getEditPlace().getLat().toString());
+            lngView.setText(model.getEditPlace().getLng().toString());
+            locationRow.setVisibility(View.VISIBLE);
+        } else {
+            locationRow.setVisibility(View.GONE);
         }
     }
-    private void setUpMap() {
-
-    }*/
 
 
+
+    private void selectCategory(Category category) {
+        model.getEditPlace().setCategory(category);
+        categoryLabel.setText(category.getTitle());
+        ((GradientDrawable)categoryLabel.getBackground()).setColor(Color.parseColor(category.getColor()));
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -143,13 +187,22 @@ public class EditPlaceFragment extends Fragment {
                 ex.printStackTrace();
             }
             return true;
+        } else if (id == R.id.action_edit_location) {
+            startMapActivity();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void startMapActivity() {
+        Intent mapIntent = new Intent(getActivity(), MapActivity.class);
+        startActivity(mapIntent);
+        getActivity().overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+    }
+
 
     private void openImageIntent() throws IOException {
-        final List<Intent> cameraIntents = new ArrayList<Intent>();
+        final List<Intent> cameraIntents = new ArrayList<>();
         final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         final PackageManager packageManager = getActivity().getPackageManager();
         for (ResolveInfo res : packageManager.queryIntentActivities(captureIntent, 0)) {
@@ -166,7 +219,7 @@ public class EditPlaceFragment extends Fragment {
 
         final Intent chooserIntent = Intent.createChooser(ImageUtility.getGalleryIntent(), "Select Source");
 
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[]{}));
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[0]));
         startActivityForResult(chooserIntent, PICTURE_REQUEST);
 
     }
@@ -174,7 +227,7 @@ public class EditPlaceFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == PICTURE_REQUEST) {
-            if(resultCode == getActivity().RESULT_OK) {
+            if(resultCode == Activity.RESULT_OK) {
                 if(!ImageUtility.isCameraIntent(intent)) {
                     imageUri = intent.getData();
                 }

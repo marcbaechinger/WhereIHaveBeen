@@ -50,10 +50,11 @@
     <string name="title_activity_login">Login</string>
     <string name="title_activity_add_friend">Add a friends</string>
     <string name="category_spinner_title">Category</string>
-
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="all_categories">All locations</string>
+    <string name="action_edit_location">Edit location</string>
+
     <string-array name="drawer_items">
         <item>All places</item>
         <item>Venus</item>
@@ -64,4 +65,11 @@
         <item>Uranus</item>
         <item>Neptune</item>
     </string-array>
+
+    <string name="title_activity_map">MapActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="cancel">cancel</string>
+    <string name="current_location">Current location</string>
+
 </resources>

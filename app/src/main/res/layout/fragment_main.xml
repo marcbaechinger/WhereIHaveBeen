@@ -15,16 +15,8 @@
 
 
     <ImageButton
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:src="@drawable/fab_button"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
         android:id="@+id/fab"
-        android:translationZ="1dp"
-        android:elevation="12dp"
-        android:background="@drawable/fab_button"/>
+        android:src="@drawable/plus"
+        style="@style/Fab"/>
 
 </RelativeLayout>

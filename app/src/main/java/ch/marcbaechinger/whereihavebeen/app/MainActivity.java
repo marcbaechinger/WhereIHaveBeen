@@ -127,8 +127,10 @@ public class MainActivity extends Activity {
             mDrawerList.setSelection(position);
             mDrawerList.setItemChecked(position, true);
             allLocationsItem.setSelected(false);
+            UIModel.instance(getApplicationContext()).setSelectedCategoryByTitle(mTitle.toString());
         } else {
             mTitle = getString(R.string.all_categories);
+            UIModel.instance(getApplicationContext()).setSelectedCategory(null);
             selectPlaces(null);
             allLocationsItem.setSelected(true);
             mDrawerList.setItemChecked(mDrawerList.getCheckedItemPosition(), false);

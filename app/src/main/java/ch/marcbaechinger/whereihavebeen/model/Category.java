@@ -3,6 +3,7 @@ package ch.marcbaechinger.whereihavebeen.model;
 public class Category {
     private String title;
     private String color;
+    private int id;
 
     public Category() {
     }
@@ -26,5 +27,18 @@ public class Category {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return title;
     }
 }

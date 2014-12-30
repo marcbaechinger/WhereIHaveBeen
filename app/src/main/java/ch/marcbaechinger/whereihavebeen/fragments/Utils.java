@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.graphics.Point;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 
@@ -57,26 +56,6 @@ public class Utils {
                 })
                 .create()
                 .show();
-    }
-
-    /**
-     * Shows a (long) toast
-     *
-     * @param context
-     * @param msg
-     */
-    public static void showToast(Context context, String msg) {
-        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-    }
-
-    /**
-     * Shows a (long) toast.
-     *
-     * @param context
-     * @param resourceId
-     */
-    public static void showToast(Context context, int resourceId) {
-        Toast.makeText(context, context.getString(resourceId), Toast.LENGTH_LONG).show();
     }
 
     /**
