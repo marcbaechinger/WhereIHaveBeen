@@ -105,9 +105,12 @@ public class PlacesContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
         int match = URI_MATCHER.match(uri);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         switch (match) {
             case PLACE:
-                return getContext().getContentResolver().update(uri, contentValues, selection, selectionArgs);
+                int updateCount = db.update(DataContract.PLACE.TABLE, contentValues, DataContract.PLACE.FIELD_ID + "=?", selectionArgs);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return updateCount;
         }
         return 0;
     }

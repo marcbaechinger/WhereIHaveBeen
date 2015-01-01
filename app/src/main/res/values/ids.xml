@@ -2,4 +2,5 @@
 <resources>
     <item name="categoryTitle" type="id">9991</item>
     <item name="placeTag" type="id">123456</item>
+    <item name="home" type="id">9999991</item>
 </resources>

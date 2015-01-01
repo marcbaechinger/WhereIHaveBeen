@@ -15,6 +15,15 @@ public class DataContract {
 
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH).build();
 
+        public static final String[] VIEW_PROJECTION = new String[]{
+                DataContract.PLACE.FIELD_ID,
+                DataContract.PLACE.TABLE + "." + DataContract.PLACE.FIELD_TITLE,
+                DataContract.PLACE.FIELD_DESCRIPTION,
+                DataContract.PLACE.FIELD_PICTURE,
+                DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_TITLE,
+                DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_COLOR
+        };
+
         public static final String CONTENT_TYPE_DIR = "vnd.android.cursor.dir/" + AUTHORITY + "/" + PATH;
         public static final String CONTENT_TYPE_ITEM = "vnd.android.cursor.ITEM/" + AUTHORITY + "/" + PATH;
 

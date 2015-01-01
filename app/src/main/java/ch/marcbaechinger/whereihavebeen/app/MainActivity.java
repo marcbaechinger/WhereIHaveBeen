@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,7 @@ import ch.marcbaechinger.whereihavebeen.adapter.CategoryAdapter;
 import ch.marcbaechinger.whereihavebeen.adapter.CategoryAdapterCallbacks;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.fragments.PlacesFragment;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
 
 public class MainActivity extends Activity {
@@ -47,18 +49,22 @@ public class MainActivity extends Activity {
                     .commit();
         }
 
-
-        mTitle = getString(R.string.all_categories);
-        setTitle(mTitle);
-
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitle(mTitle);
-        setActionBar(mToolbar);
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         leftDrawer = findViewById(R.id.left_drawer);
         mDrawerList = (ListView) findViewById(R.id.categoryList);
 
+        mTitle = getString(R.string.all_categories);
+        setTitle(mTitle);
+
+        setupToolbar();
+        setupDrawer();
+
+
+        selectItem(-1);
+        getLoaderManager().initLoader(0, null, new CategoryAdapterCallbacks(this, categoryAdapter));
+    }
+
+    private void setupDrawer() {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
@@ -86,18 +92,29 @@ public class MainActivity extends Activity {
         ) {
             public void onDrawerClosed(View view) {
                 mToolbar.setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
                 mToolbar.setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+    }
 
-        selectItem(-1);
-        getLoaderManager().initLoader(0, null, new CategoryAdapterCallbacks(this, categoryAdapter));
+    private void setupToolbar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setActionBar(mToolbar);
+        getActionBar().setHomeButtonEnabled(true);
+        mToolbar.setTitle(mTitle);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "clicked on nav icon");
+                mDrawerLayout.openDrawer(leftDrawer);
+            }
+        });
     }
 
 
@@ -110,9 +127,10 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_add_person) {
-            Intent friendsActivityIntent = new Intent(this, AddFriendActivity.class);
-            startActivity(friendsActivityIntent);
+        if (id == R.id.action_show_map) {
+            Intent intent = new Intent(this, MapActivity.class);
+            intent.setAction(MapActivity.LIST_VIEW);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -123,7 +141,6 @@ public class MainActivity extends Activity {
             Cursor cursor = (Cursor)mDrawerList.getItemAtPosition(position);
             int col = cursor.getColumnIndex(DataContract.CATEGORY.FIELD_TITLE);
             mTitle = cursor.getString(col);
-            selectPlaces(mTitle.toString());
             mDrawerList.setSelection(position);
             mDrawerList.setItemChecked(position, true);
             allLocationsItem.setSelected(false);
@@ -131,19 +148,11 @@ public class MainActivity extends Activity {
         } else {
             mTitle = getString(R.string.all_categories);
             UIModel.instance(getApplicationContext()).setSelectedCategory(null);
-            selectPlaces(null);
             allLocationsItem.setSelected(true);
             mDrawerList.setItemChecked(mDrawerList.getCheckedItemPosition(), false);
             mDrawerList.setSelection(-1);
         }
         mDrawerLayout.closeDrawer(leftDrawer);
-    }
-
-    private void selectPlaces(String categoryTitle) {
-        PlacesFragment placesFragment = (PlacesFragment) getFragmentManager().findFragmentById(R.id.container);
-        if (placesFragment != null) {
-            placesFragment.setCategoryTitle(categoryTitle);
-        }
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {

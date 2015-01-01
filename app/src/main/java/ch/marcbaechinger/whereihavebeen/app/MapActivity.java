@@ -8,6 +8,8 @@ import ch.marcbaechinger.whereihavebeen.fragments.GMapFragment;
 
 public class MapActivity extends Activity {
 
+    public static final String LIST_VIEW = "places_list_view";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

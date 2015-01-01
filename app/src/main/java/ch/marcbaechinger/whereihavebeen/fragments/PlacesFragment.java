@@ -17,13 +17,14 @@ import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.PlaceAdapter;
 import ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity;
 import ch.marcbaechinger.whereihavebeen.app.PlaceDetailActivity;
-import ch.marcbaechinger.whereihavebeen.app.UIModel;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.model.Category;
+import ch.marcbaechinger.whereihavebeen.model.ModelListener;
 import ch.marcbaechinger.whereihavebeen.model.Place;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 import ch.marcbaechinger.whereihavebeen.swipe.SwipeDismissListViewTouchListener;
 
-public class PlacesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>  {
+public class PlacesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, ModelListener {
 
     private static final String[] PROJECTION = new String[]{
             DataContract.PLACE.FIELD_ID,
@@ -36,6 +37,7 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
 
     private PlaceAdapter listViewAdapter;
     private UIModel model;
+    private boolean placeDeleted = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,7 +62,7 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             }
         });
 
-        ListView placesListView = (ListView) rootView.findViewById(R.id.placesListView);
+        final ListView placesListView = (ListView) rootView.findViewById(R.id.placesListView);
         placesListView.setAdapter(listViewAdapter);
         placesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -102,9 +104,34 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
         // Setting this scroll listener is required to ensure that during ListView scrolling,
         // we don't look for swipes.
         placesListView.setOnScrollListener(touchListener.makeScrollListener());
-        getLoaderManager().initLoader(0, null, this);
 
+        model.setSelectedPlace(null);
+        model.addDeletionListener(this);
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        Place selectedPlace = model.getSelectedPlace();
+        Place editPlace = model.getEditPlace();
+        if (editPlace != null && selectedPlace == null) {
+            getLoaderManager().restartLoader(0, null, this);
+        } else if (selectedPlace != null) {
+            listViewAdapter.notifyDataSetChanged();
+            model.setSelectedPlace(null);
+        } else if (placeDeleted) {
+            getLoaderManager().restartLoader(0, null, this);
+            placeDeleted = false;
+        } else {
+            getLoaderManager().initLoader(0, null, this);
+        }
+        super.onResume();
+    }
+
+    @Override
+    public void onDestroyView() {
+        model.removeDeletionListener(this);
+        super.onStop();
     }
 
     @Override
@@ -128,17 +155,13 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
         listViewAdapter.swapCursor(null);
     }
 
-    public void setCategoryTitle(String title) {
-        Category category = UIModel.instance(getActivity()).getSelectedCategory();
-        if (category == null) {
-            UIModel.instance(getActivity()).setSelectedCategoryByTitle(title);
-            getLoaderManager().restartLoader(0, null, this);
-        } else if (title == null) {
-            UIModel.instance(getActivity()).setSelectedCategory(null);
-            getLoaderManager().restartLoader(0, null, this);
-        } else if (title != null && (category == null || !category.getTitle().equals(title))) {
-            UIModel.instance(getActivity()).setSelectedCategoryByTitle(title);
-            getLoaderManager().restartLoader(0, null, this);
-        }
+    @Override
+    public void onPlaceDeletion(int id) {
+        placeDeleted = true;
+    }
+
+    @Override
+    public void onCategorySelection(Category category) {
+        getLoaderManager().restartLoader(0, null, this);
     }
 }

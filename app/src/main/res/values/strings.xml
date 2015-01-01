@@ -71,5 +71,6 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="cancel">cancel</string>
     <string name="current_location">Current location</string>
+    <string name="action_show_map">Show list on map</string>
 
 </resources>

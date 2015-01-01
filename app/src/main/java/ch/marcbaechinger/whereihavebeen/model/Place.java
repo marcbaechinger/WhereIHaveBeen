@@ -1,6 +1,8 @@
 package ch.marcbaechinger.whereihavebeen.model;
 
-public class Place {
+import java.io.Serializable;
+
+public class Place implements Serializable, Cloneable {
     private String title;
     private String description;
     private int id;
@@ -38,7 +40,7 @@ public class Place {
         return id;
     }
 
-    public void setLat(double lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
@@ -46,7 +48,7 @@ public class Place {
         return lat;
     }
 
-    public void setLng(double lng) {
+    public void setLng(Double lng) {
         this.lng = lng;
     }
 
@@ -68,5 +70,13 @@ public class Place {
 
     public void setPictureUri(String pictureUri) {
         this.pictureUri = pictureUri;
+    }
+
+    public Object clone()  {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

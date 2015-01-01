@@ -18,8 +18,8 @@
             android:id="@+id/toolbar"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:minHeight="62dp"
             android:paddingTop="24dp"
+            android:navigationIcon="@drawable/ic_drawer"
             android:elevation="4dp"
             android:background="@color/wihbPrimaryColor" />
     </FrameLayout>

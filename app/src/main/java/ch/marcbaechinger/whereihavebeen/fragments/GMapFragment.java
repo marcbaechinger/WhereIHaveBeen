@@ -1,6 +1,7 @@
 package ch.marcbaechinger.whereihavebeen.fragments;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,44 +15,51 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import app.ch.marcbaechinger.whereihavebeen.R;
-import ch.marcbaechinger.whereihavebeen.app.UIModel;
+import ch.marcbaechinger.whereihavebeen.app.MapActivity;
 import ch.marcbaechinger.whereihavebeen.location.LocationRetriever;
 import ch.marcbaechinger.whereihavebeen.location.SimpleLocationListener;
 import ch.marcbaechinger.whereihavebeen.model.Place;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
 public class GMapFragment extends Fragment implements OnMapReadyCallback, SimpleLocationListener {
 
     private static final float DEFAULT_ZOOM_LEVEL = 15;
+
+
+
     private GoogleMap map;
     private Marker marker;
     private LatLng selectedPosition;
     private TextView latLabel;
     private TextView lngLabel;
     private UIModel model;
+    private ImageButton ok;
+    private List<Marker> markers;
+    private ImageButton cancel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
+        markers = new ArrayList<>();
+
         model = UIModel.instance(getActivity());
 
         MapFragment mapFragment = (MapFragment)getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        ImageButton ok = (ImageButton) rootView.findViewById(R.id.fab);
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                model.getEditPlace().setLatLng(selectedPosition.latitude, selectedPosition.longitude);
-                getActivity().finish();
-            }
-        });
-        ImageButton cancel = (ImageButton) rootView.findViewById(R.id.fabCancel);
+        ok = (ImageButton) rootView.findViewById(R.id.fab);
+
+        cancel = (ImageButton) rootView.findViewById(R.id.fabCancel);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,11 +75,17 @@ public class GMapFragment extends Fragment implements OnMapReadyCallback, Simple
 
     @Override
     public void onMapReady(GoogleMap map) {
-        initMap(map);
+        Intent intent = getActivity().getIntent();
+        this.map = map;
+
+        if ( MapActivity.LIST_VIEW.equals(intent.getAction()) ) {
+            initListMap(map);
+        } else {
+            initSingleMap(map);
+        }
     }
 
-    private void initMap(GoogleMap map) {
-        this.map = map;
+    private void initSingleMap(GoogleMap map) {
         Place editPlace = model.getEditPlace();
         if (editPlace.getLat() == null) {
             LocationRetriever locationRetriever = new LocationRetriever(getActivity());
@@ -79,6 +93,41 @@ public class GMapFragment extends Fragment implements OnMapReadyCallback, Simple
         } else {
             updateMapLocation(editPlace.getLat(), editPlace.getLng());
         }
+
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                model.getEditPlace().setLatLng(selectedPosition.latitude, selectedPosition.longitude);
+                getActivity().finish();
+            }
+        });
+    }
+
+    private void initListMap(final GoogleMap map) {
+        cancel.setVisibility(View.GONE);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
+
+        final LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        model.queryPlaces(new UIModel.PlaceIterator() {
+            @Override
+            public void next(Place place) {
+                if (place.getLat() != null) {
+                    LatLng latLng = new LatLng(place.getLat(), place.getLng());
+                    boundsBuilder.include(latLng);
+                    addMarker(latLng, place.getTitle());
+                }
+            }
+
+            @Override
+            public void ended() {
+                map.moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 120));
+            }
+        }, model.getSelectedCategory());
     }
 
 
@@ -94,14 +143,14 @@ public class GMapFragment extends Fragment implements OnMapReadyCallback, Simple
             if (marker != null) {
                 marker.setPosition(latLng);
             } else {
-                initMarker(latLng);
+                initSingleMarker(latLng);
             }
         }
         latLabel.setText("" + latLng.latitude);
         lngLabel.setText("" + latLng.longitude);
     }
 
-    private void initMarker(LatLng latLng) {
+    private void initSingleMarker(LatLng latLng) {
         selectedPosition = latLng;
         this.marker = this.map.addMarker(new MarkerOptions()
                 .position(latLng)
@@ -123,5 +172,14 @@ public class GMapFragment extends Fragment implements OnMapReadyCallback, Simple
                 lngLabel.setText("" + selectedPosition.longitude);
             }
         });
+    }
+
+    private void addMarker(LatLng latLng, String title) {
+        this.markers.add(
+            this.map.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(title)
+                .draggable(true))
+        );
     }
 }

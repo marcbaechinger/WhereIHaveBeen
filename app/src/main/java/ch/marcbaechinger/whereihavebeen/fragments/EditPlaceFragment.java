@@ -33,9 +33,8 @@ import java.util.List;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.CategorySelectionAdapter;
-import ch.marcbaechinger.whereihavebeen.app.MainActivity;
 import ch.marcbaechinger.whereihavebeen.app.MapActivity;
-import ch.marcbaechinger.whereihavebeen.app.UIModel;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.model.Category;
 import ch.marcbaechinger.whereihavebeen.model.Place;
@@ -53,17 +52,22 @@ public class EditPlaceFragment extends Fragment {
     private TextView lngView;
     private UIModel model;
     private View locationRow;
+    private EditText title;
+    private ImageView imageView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_edit_place, container, false);
+
         model = UIModel.instance(getActivity());
+
+        final Place place = model.getEditPlace();
 
         setHasOptionsMenu(true);
 
         Intent intent = getActivity().getIntent();
-        final EditText title = (EditText) rootView.findViewById(R.id.createEditTitle);
+        title = (EditText) rootView.findViewById(R.id.createEditTitle);
         if (intent.getExtras() != null) {
             String subject = intent.getExtras().getString(Intent.EXTRA_SUBJECT);
             title.setText(subject);
@@ -71,14 +75,13 @@ public class EditPlaceFragment extends Fragment {
 
         setupCategorySelectionUi(rootView);
 
+        imageView = (ImageView)rootView.findViewById(R.id.createImage);
         ImageButton saveButton = (ImageButton) rootView.findViewById(R.id.createButtonSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 save(title, model);
-
-                Intent backIntent = new Intent(getActivity(), MainActivity.class);
-                startActivity(backIntent);
+                getActivity().finish();
             }
         });
 
@@ -87,6 +90,15 @@ public class EditPlaceFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 startMapActivity();
+            }
+        });
+        locationRow.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                place.setLat(null);
+                place.setLng(null);
+                syncLocationUI(place);
+                return true;
             }
         });
         latView = (TextView)rootView.findViewById(R.id.latitude);
@@ -100,7 +112,36 @@ public class EditPlaceFragment extends Fragment {
             UIUtils.setListViewHeight(categoryList, UIUtils.calculateTotalListHeight(categoryList));
         }
 
+        if (place != null) {
+            syncUI(place);
+        }
         return rootView;
+    }
+
+    private void syncUI(Place place) {
+        title.setText(place.getTitle());
+        syncLocationUI(place);
+        if (place.getCategory() != null) {
+            selectCategory(place.getCategory());
+        }
+        if (place.getPictureUri() != null) {
+            try {
+                imageUri = Uri.parse(place.getPictureUri());
+                ImageUtility.setBitmapFromUri(imageUri, imageView, getActivity());
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+        }
+    }
+
+    private void syncLocationUI(Place place) {
+        if (place.getLat() == null) {
+            locationRow.setVisibility(View.GONE);
+        } else {
+            latView.setText(place.getLat() + "");
+            lngView.setText(place.getLng() + "");
+            locationRow.setVisibility(View.VISIBLE);
+        }
     }
 
     private void setupCategorySelectionUi(View rootView) {
@@ -110,6 +151,7 @@ public class EditPlaceFragment extends Fragment {
             public void onClick(View v) {
                 UIUtils.setListViewHeight(categoryList, UIUtils.calculateTotalListHeight(categoryList));
                 categoryLabel.setVisibility(View.GONE);
+                categoryList.setVisibility(View.VISIBLE);
             }
         });
 
@@ -123,7 +165,6 @@ public class EditPlaceFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 UIUtils.setListViewHeight(categoryList, 0);
-                categoryLabel.setVisibility(View.VISIBLE);
                 selectCategory((Category) adapter.getItem(position));
                 categoryList.setSelection(position);
             }
@@ -131,13 +172,15 @@ public class EditPlaceFragment extends Fragment {
         categoryList.setAdapter(adapter);
     }
 
-    private void save(EditText title, UIModel uiModel) {
+    private boolean save(EditText title, UIModel uiModel) {
         ContentValues contentValues = new ContentValues();
         Place editPlace = uiModel.getEditPlace();
 
         contentValues.put(DataContract.PLACE.FIELD_TITLE, title.getText().toString());
+        editPlace.setTitle(title.getText().toString());
         if (imageUri != null) {
             contentValues.put(DataContract.PLACE.FIELD_PICTURE, imageUri.toString());
+            editPlace.setPictureUri(imageUri.toString());
         }
         contentValues.put(DataContract.PLACE.FIELD_CATEGORY, editPlace.getCategory().getId());
 
@@ -148,7 +191,22 @@ public class EditPlaceFragment extends Fragment {
             contentValues.put(DataContract.PLACE.FIELD_LNG, editPlace.getLng());
         }
 
-        getActivity().getContentResolver().insert(DataContract.PLACE.CONTENT_URI, contentValues);
+        if (model.getSelectedPlace() == null) {
+            getActivity().getContentResolver().insert(DataContract.PLACE.CONTENT_URI, contentValues);
+            return true;
+        } else {
+            String[] selectionArgs = new String[] {String.valueOf(model.getSelectedPlace().getId())};
+            contentValues.put(DataContract.PLACE.FIELD_ID, model.getSelectedPlace().getId());
+            getActivity().getContentResolver().update(
+                    DataContract.PLACE.CONTENT_URI,
+                    contentValues,
+                    DataContract.PLACE.FIELD_ID,
+                    selectionArgs
+            );
+            editPlace.setId(model.getSelectedPlace().getId());
+            model.commitPlaceEdit();
+            return false;
+        }
     }
 
     @Override
@@ -173,6 +231,8 @@ public class EditPlaceFragment extends Fragment {
         model.getEditPlace().setCategory(category);
         categoryLabel.setText(category.getTitle());
         ((GradientDrawable)categoryLabel.getBackground()).setColor(Color.parseColor(category.getColor()));
+        categoryLabel.setVisibility(View.VISIBLE);
+        categoryList.setVisibility(View.GONE);
     }
 
     @Override
@@ -233,7 +293,6 @@ public class EditPlaceFragment extends Fragment {
                 }
 
                 try {
-                    ImageView imageView = (ImageView)getActivity().findViewById(R.id.createImage);
                     ImageUtility.setBitmapFromUri(imageUri, imageView, getActivity());
                 } catch (IOException e) {
                     e.printStackTrace();

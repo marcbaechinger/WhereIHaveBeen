@@ -1,6 +1,7 @@
 package ch.marcbaechinger.whereihavebeen.fragments;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -13,44 +14,72 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
-import ch.marcbaechinger.whereihavebeen.app.UIModel;
+import ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity;
 import ch.marcbaechinger.whereihavebeen.model.Place;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
-public class PlaceDetailFragment extends Fragment {
+public class PlaceDetailFragment extends Fragment implements FabClickHandler {
 
     private ImageView pictureView;
+    private FabManager fabManager;
+    private TextView location;
+    private TextView categoryView;
+    private UIModel model;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_detail_place, container, false);
 
-        Place place = UIModel.instance(getActivity()).getSelectedPlace();
+        model = UIModel.instance(getActivity());
 
-        getActivity().setTitle(place.getTitle());
-        TextView categoryView = (TextView) rootView.findViewById(R.id.placeDetailCategory);
+        fabManager = new FabManager();
+        fabManager.captureButtons(rootView);
+        fabManager.setFabListener(new FabManager.FabListener() {
+            @Override
+            public void onClick(View v, boolean isPrimary) {
+                if (isPrimary) {
+                    Intent detailIntent = new Intent(getActivity(), EditPlaceActivity.class);
+                    model.setEditPlace((Place) model.getSelectedPlace().clone());
+                    startActivity(detailIntent);
+                    getActivity().overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+                } else {
+                    Place placeToDelete = model.getSelectedPlace();
+                    model.setSelectedPlace(null);
+                    model.deletePlace(placeToDelete.getId());
+                    getActivity().finish();
+                }
+            }
+        });
+        categoryView = (TextView) rootView.findViewById(R.id.placeDetailCategory);
+        location = (TextView) rootView.findViewById(R.id.placeDetailLat);
+        pictureView = (ImageView) rootView.findViewById(R.id.placeDetailImageView);
+        return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncUI(model.getSelectedPlace());
+    }
+
+    private void syncUI(Place place) {
+        if (place.getPictureUri() != null) {
+            Picasso.with(getActivity())
+                    .load(place.getPictureUri())
+                    .resize(Utils.getDisplaySize(getActivity()).x, Utils.dpToPx(320, getActivity()))
+                    .centerCrop()
+                    .into(pictureView);
+        }
+        if (place.getLat() != null) {
+            location.setText(place.getLat().toString() + " / " + place.getLng().toString());
+        }
+
         categoryView.setText(place.getCategory().getTitle());
         GradientDrawable categoryBg = (GradientDrawable) categoryView.getBackground();
         categoryBg.setColor(Color.parseColor(place.getCategory().getColor()));
 
-        TextView lat = (TextView) rootView.findViewById(R.id.placeDetailLat);
-        if (place.getLat() != null) {
-            lat.setText(place.getLat().toString());
-        }
-        TextView lng = (TextView) rootView.findViewById(R.id.placeDetailLng);
-        if (place.getLng() != null) {
-            lng.setText(place.getLng().toString());
-        }
-
-        pictureView = (ImageView) rootView.findViewById(R.id.placeDetailImageView);
-        if (place.getPictureUri() != null) {
-            Picasso.with(getActivity())
-                .load(place.getPictureUri())
-                .resize(Utils.getDisplaySize(getActivity()).x, Utils.dpToPx(320, getActivity()))
-                .centerCrop()
-                .into(pictureView);
-        }
-        return rootView;
+        getActivity().setTitle(place.getTitle());
     }
 
     @Override
