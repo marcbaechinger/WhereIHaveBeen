@@ -72,5 +72,6 @@
     <string name="cancel">cancel</string>
     <string name="current_location">Current location</string>
     <string name="action_show_map">Show list on map</string>
+    <string name="title_activity_image_search">Image search</string>
 
 </resources>

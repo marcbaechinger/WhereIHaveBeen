@@ -33,11 +33,12 @@ import java.util.List;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.CategorySelectionAdapter;
+import ch.marcbaechinger.whereihavebeen.app.ImageSearchActivity;
 import ch.marcbaechinger.whereihavebeen.app.MapActivity;
-import ch.marcbaechinger.whereihavebeen.model.UIModel;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.model.Category;
 import ch.marcbaechinger.whereihavebeen.model.Place;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
 public class EditPlaceFragment extends Fragment {
 
@@ -62,16 +63,14 @@ public class EditPlaceFragment extends Fragment {
 
         model = UIModel.instance(getActivity());
 
+
+        Intent intent = getActivity().getIntent();
+
         final Place place = model.getEditPlace();
 
         setHasOptionsMenu(true);
 
-        Intent intent = getActivity().getIntent();
         title = (EditText) rootView.findViewById(R.id.createEditTitle);
-        if (intent.getExtras() != null) {
-            String subject = intent.getExtras().getString(Intent.EXTRA_SUBJECT);
-            title.setText(subject);
-        }
 
         setupCategorySelectionUi(rootView);
 
@@ -115,7 +114,28 @@ public class EditPlaceFragment extends Fragment {
         if (place != null) {
             syncUI(place);
         }
+
+        if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_SEND)) {
+            handleSendAction(intent);
+        }
         return rootView;
+    }
+
+    private void handleSendAction(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras.containsKey(Intent.EXTRA_SUBJECT)) {
+            title.setText(extras.get(Intent.EXTRA_SUBJECT).toString());
+        }
+        if (extras.containsKey(Intent.EXTRA_TEXT)) {
+            String text = extras.get(Intent.EXTRA_TEXT).toString().trim();
+            if (text.startsWith("http://") || text.startsWith("https://")) {
+
+            }
+        }
+
+        for (String key : extras.keySet()) {
+            Log.d(TAG, "key: " + key + " - " + extras.get(key));
+        }
     }
 
     private void syncUI(Place place) {
@@ -265,17 +285,23 @@ public class EditPlaceFragment extends Fragment {
         final List<Intent> cameraIntents = new ArrayList<>();
         final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         final PackageManager packageManager = getActivity().getPackageManager();
+
+        File photoFile = ImageUtility.createImageFile();
+        imageUri = Uri.fromFile(photoFile);
+
         for (ResolveInfo res : packageManager.queryIntentActivities(captureIntent, 0)) {
-            final String packageName = res.activityInfo.packageName;
             final Intent intent = new Intent(captureIntent);
             intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(packageName);
-
-            File photoFile = ImageUtility.createImageFile();
-            imageUri = Uri.fromFile(photoFile);
+            intent.setPackage(res.activityInfo.packageName);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+
             cameraIntents.add(intent);
         }
+
+        Intent imageSearchIntent = new Intent(getActivity(), ImageSearchActivity.class);
+        imageSearchIntent.putExtra(ImageSearchActivity.IMAGE_QUERY, title.getText().toString());
+
+        cameraIntents.add(imageSearchIntent);
 
         final Intent chooserIntent = Intent.createChooser(ImageUtility.getGalleryIntent(), "Select Source");
 

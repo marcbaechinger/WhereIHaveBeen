@@ -81,6 +81,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.marcbaechinger.whereihavebeen.app.EditPlaceActivity" />
         </activity>
+        <activity
+            android:name="ch.marcbaechinger.whereihavebeen.app.ImageSearchActivity"
+            android:label="@string/title_activity_image_search" >
+        </activity>
     </application>
 
 </manifest>
