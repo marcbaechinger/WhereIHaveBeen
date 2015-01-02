@@ -55,6 +55,9 @@ public class BitmapCropAction extends AsyncTask<String, Void, Bitmap> {
 
 
     public Bitmap getCroppedBitmap(Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
