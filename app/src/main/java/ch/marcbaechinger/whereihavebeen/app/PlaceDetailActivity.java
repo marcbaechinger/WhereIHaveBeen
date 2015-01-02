@@ -21,6 +21,10 @@ public class PlaceDetailActivity extends Activity {
                     .commit();
         }
 
+        setupToolbar();
+    }
+
+    private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_back);
         setActionBar(toolbar);
