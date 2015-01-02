@@ -1,5 +1,8 @@
 package ch.marcbaechinger.whereihavebeen.fragments;
 
+import android.app.Activity;
+import android.graphics.Point;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListAdapter;
@@ -24,5 +27,12 @@ public class UIUtils {
         }
 
         return totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+    }
+
+    public static int getScreenWidth(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
     }
 }
