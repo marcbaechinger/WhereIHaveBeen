@@ -75,6 +75,16 @@ public class EditPlaceFragment extends Fragment {
         setupCategorySelectionUi(rootView);
 
         imageView = (ImageView)rootView.findViewById(R.id.createImage);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    startImageInputIntent();
+                } catch (IOException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+            }
+        });
         ImageButton saveButton = (ImageButton) rootView.findViewById(R.id.createButtonSave);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,14 +121,24 @@ public class EditPlaceFragment extends Fragment {
             UIUtils.setListViewHeight(categoryList, UIUtils.calculateTotalListHeight(categoryList));
         }
 
-        if (place != null) {
-            syncUI(place);
-        }
-
         if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_SEND)) {
             handleSendAction(intent);
         }
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (model.getEditPlace() != null) {
+            syncUI(model.getEditPlace());
+        }
+    }
+
+    @Override
+    public void onPause() {
+        model.getEditPlace().setTitle(title.getText().toString());
+        super.onPause();
     }
 
     private void handleSendAction(Intent intent) {
@@ -260,7 +280,7 @@ public class EditPlaceFragment extends Fragment {
         if (id == R.id.action_addPicture) {
             // Create the File where the photo should go
             try {
-                openImageIntent();
+                startImageInputIntent();
             } catch (IOException ex) {
                 Log.e(TAG, ex.getMessage());
                 ex.printStackTrace();
@@ -280,7 +300,7 @@ public class EditPlaceFragment extends Fragment {
     }
 
 
-    private void openImageIntent() throws IOException {
+    private void startImageInputIntent() throws IOException {
         final List<Intent> cameraIntents = new ArrayList<>();
         final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         final PackageManager packageManager = getActivity().getPackageManager();
@@ -297,16 +317,19 @@ public class EditPlaceFragment extends Fragment {
             cameraIntents.add(intent);
         }
 
-        Intent imageSearchIntent = new Intent(getActivity(), ImageSearchActivity.class);
-        imageSearchIntent.putExtra(ImageSearchActivity.IMAGE_QUERY, title.getText().toString());
-
-        cameraIntents.add(imageSearchIntent);
+        cameraIntents.add(getImageSearchIntent());
 
         final Intent chooserIntent = Intent.createChooser(ImageUtility.getGalleryIntent(), "Select Source");
 
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, cameraIntents.toArray(new Parcelable[0]));
         startActivityForResult(chooserIntent, PICTURE_REQUEST);
 
+    }
+
+    private Intent getImageSearchIntent() {
+        Intent imageSearchIntent = new Intent(getActivity(), ImageSearchActivity.class);
+        imageSearchIntent.putExtra(ImageSearchActivity.IMAGE_QUERY, title.getText().toString());
+        return imageSearchIntent;
     }
 
     @Override
