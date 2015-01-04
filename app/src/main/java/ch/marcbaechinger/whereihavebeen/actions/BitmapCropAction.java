@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.widget.ImageView;
@@ -70,13 +68,13 @@ public class BitmapCropAction extends AsyncTask<String, Void, Bitmap> {
         canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);
 
-        canvas.drawCircle(
+        /*canvas.drawCircle(
             bitmap.getWidth() / 2,
             bitmap.getHeight() / 2,
             bitmap.getWidth() / 2,
             paint
         );
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));*/
         canvas.drawBitmap(bitmap, rect, rect, paint);
 
         return output;

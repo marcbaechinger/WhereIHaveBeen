@@ -1,5 +1,6 @@
 package ch.marcbaechinger.whereihavebeen.fragments;
 
+import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,10 +70,17 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long index) {
                 Intent detailIntent = new Intent(getActivity(), PlaceDetailActivity.class);
+
+                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle();
+
+                ActivityOptions options = ActivityOptions
+                    .makeSceneTransitionAnimation(getActivity(),
+                            new Pair<View, String>(view.findViewById(R.id.placeListViewItemImage), "tile"));
+
                 detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(pos));
                 model.setSelectedPlace((Place) view.getTag(R.id.placeTag));
-                startActivity(detailIntent);
-                getActivity().overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
+
+                startActivity(detailIntent, options.toBundle());
             }
         });
 

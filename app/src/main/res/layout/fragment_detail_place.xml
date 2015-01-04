@@ -20,6 +20,7 @@
                     android:id="@+id/placeDetailImageView"
                     android:adjustViewBounds="true"
                     android:layout_width="fill_parent"
+                    android:transitionName="tile"
                     android:layout_height="wrap_content"/>
 
 
@@ -31,6 +32,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_marginTop="272dp"
                     android:layout_marginLeft="8dp"
+                    android:transitionName="category"
                     style="@style/CategoryLabelBig"/>
 
                 <TextView

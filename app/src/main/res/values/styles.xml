@@ -6,6 +6,11 @@
         <item name="android:textColorPrimary">@color/wihbTextColorPrimary</item>
         <item name="android:textColor">@color/wihbTextColor</item>
         <item name="android:colorPrimaryDark">@color/wihbPrimaryColorDark</item>
+
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/change_image_transform</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/change_image_transform</item>
     </style>
 
     <style name="DefaultTextViewStyle" parent="android:Widget.TextView">

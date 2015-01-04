@@ -21,6 +21,7 @@ public class PlaceDetailActivity extends Activity {
                     .commit();
         }
 
+        getWindow().setAllowEnterTransitionOverlap(true);
         setupToolbar();
     }
 
@@ -34,7 +35,7 @@ public class PlaceDetailActivity extends Activity {
 
     @Override
     public boolean onNavigateUp() {
-        this.finish();
+        onBackPressed();
         return true;
     }
 }
