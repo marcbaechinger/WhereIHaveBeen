@@ -44,6 +44,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (category != null) {
             query += " AND " + DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_TITLE + " = '" + category + "'";
         }
+
+                query += " ORDER BY " + DataContract.PLACE.FIELD_TITLE;
         return query;
     }
 
