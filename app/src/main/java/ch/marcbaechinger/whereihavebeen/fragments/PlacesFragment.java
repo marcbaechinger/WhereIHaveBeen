@@ -75,12 +75,33 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
 
                 ActivityOptions options = ActivityOptions
                     .makeSceneTransitionAnimation(getActivity(),
-                            new Pair<View, String>(view.findViewById(R.id.placeListViewItemImage), "tile"));
+                            new Pair<>(view.findViewById(R.id.placeListViewItemImage), "tile"));
 
                 detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(pos));
                 model.setSelectedPlace((Place) view.getTag(R.id.placeTag));
 
                 startActivity(detailIntent, options.toBundle());
+            }
+        });
+
+        placesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Intent detailIntent = new Intent(getActivity(), EditPlaceActivity.class);
+
+                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle();
+
+                ActivityOptions options = ActivityOptions
+                        .makeSceneTransitionAnimation(getActivity(),
+                                new Pair<>(view.findViewById(R.id.placeListViewItemImage), "tile"));
+
+                detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(position));
+                Place place = (Place) view.getTag(R.id.placeTag);
+                model.setSelectedPlace(place);
+                model.setEditPlace((Place) place.clone());
+
+                startActivity(detailIntent, options.toBundle());
+                return true;
             }
         });
 

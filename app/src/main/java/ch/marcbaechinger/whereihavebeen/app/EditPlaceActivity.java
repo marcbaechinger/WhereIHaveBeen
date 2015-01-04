@@ -29,6 +29,7 @@ public class EditPlaceActivity extends Activity {
                     .commit();
         }
 
+        getWindow().setAllowEnterTransitionOverlap(true);
         setActionBar((Toolbar) findViewById(R.id.toolbar));
     }
 
