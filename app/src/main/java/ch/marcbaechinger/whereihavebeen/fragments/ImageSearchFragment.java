@@ -68,7 +68,7 @@ public class ImageSearchFragment extends Fragment {
                 ImageView imageView = (ImageView) view;
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
 
-                Uri uri = storageHelper.store(bitmapDrawable.getBitmap(), new PlaceTileFilenameGenerator(model.getSelectedPlace()));
+                Uri uri = storageHelper.store(bitmapDrawable.getBitmap(), new PlaceTileFilenameGenerator());
                 model.getEditPlace().setPictureUri(uri.toString());
 
                 Log.d(TAG, "stored to " + uri.toString());
