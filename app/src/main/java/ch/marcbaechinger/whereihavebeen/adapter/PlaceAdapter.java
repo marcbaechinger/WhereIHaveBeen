@@ -45,6 +45,11 @@ public class PlaceAdapter extends SimpleCursorAdapter {
             view.setTag(R.id.placeTag, place);
         }
 
+        if (place.getLat() == null) {
+            view.findViewById(R.id.placeIcon).setVisibility(View.GONE);
+        } else {
+            view.findViewById(R.id.placeIcon).setVisibility(View.VISIBLE);
+        }
         TextView title = (TextView) view.findViewById(R.id.placeListViewItemTitle);
         title.setText(place.getTitle());
 
@@ -59,6 +64,4 @@ public class PlaceAdapter extends SimpleCursorAdapter {
             new BitmapCropAction(image, context).execute(place.getPictureUri());
         }
     }
-
-
 }

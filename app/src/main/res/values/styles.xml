@@ -32,8 +32,8 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@drawable/category_background_big</item>
-        <item name="android:paddingLeft">18dp</item>
-        <item name="android:paddingRight">18dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
         <item name="android:textSize">24dp</item>
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:translationZ">1dp</item>
@@ -106,6 +106,17 @@
         <item name="android:textColor">@color/locationTextColor</item>
     </style>
 
+    <style name="placePin">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
+        <item name="android:src">@drawable/ic_action_place</item>
+    </style>
+
+    <style name="placePinDark">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:src">@drawable/ic_action_place_dark</item>
+    </style>
 
 
 </resources>
