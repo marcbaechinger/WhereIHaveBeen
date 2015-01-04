@@ -52,6 +52,29 @@
         <item name="android:background">@drawable/fab_secondary_background</item>
     </style>
 
+    <style name="FabSecondaryLeft" parent="FabSecondary">
+        <item name="android:layout_marginRight">88dp</item>
+        <item name="android:layout_marginBottom">18dp</item>
+    </style>
+
+    <style name="FabLeft" parent="Fab">
+        <item name="android:layout_marginLeft">18dp</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_alignParentRight">false</item>
+    </style>
+
+    <style name="searchEdit">
+        <item name="android:background">@drawable/search_background</item>
+        <item name="android:drawableRight">@drawable/ic_action_search_dark</item>
+        <item name="android:textColor">@color/wihbTextColor</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+
     <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@null</item>
@@ -77,5 +100,7 @@
     <style name="locationSpotText">
         <item name="android:textColor">@color/locationTextColor</item>
     </style>
+
+
 
 </resources>

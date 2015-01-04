@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
 public class PlaceDetailFragment extends Fragment implements FabClickHandler {
 
+    private static final String TAG = PlaceDetailFragment.class.getSimpleName();
     private ImageView pictureView;
     private FabManager fabManager;
     private TextView location;
@@ -65,8 +67,10 @@ public class PlaceDetailFragment extends Fragment implements FabClickHandler {
 
     private void syncUI(Place place) {
         if (place.getPictureUri() != null) {
+            Log.d(TAG, "set image: " + place.getPictureUri());
             Picasso.with(getActivity())
                     .load(place.getPictureUri())
+                    .placeholder(R.drawable.image_placeholder)
                     .resize(Utils.getDisplaySize(getActivity()).x, Utils.dpToPx(320, getActivity()))
                     .centerCrop()
                     .into(pictureView);

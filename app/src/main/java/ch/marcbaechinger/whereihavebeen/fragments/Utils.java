@@ -93,4 +93,8 @@ public class Utils {
         float density = ctx.getResources().getDisplayMetrics().density;
         return Math.round((float) dp * density);
     }
+    public static int pxToDp(int px, Context ctx) {
+        float density = ctx.getResources().getDisplayMetrics().density;
+        return Math.round((float) px / density);
+    }
 }

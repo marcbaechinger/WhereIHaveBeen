@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
+import ch.marcbaechinger.whereihavebeen.fragments.ImageSearchFragment;
 
 public class ImageSearchActivity extends Activity {
 

@@ -27,4 +27,5 @@
 
     <color name="locationBackground">#333333</color>
     <color name="locationTextColor">#ffffff</color>
+    <color name="search_box_background">#bbffffff</color>
 </resources>

@@ -15,7 +15,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
-public class ImageSearchTask extends AsyncTask<String, Void, JSONObject> {
+public class ImageSearchTask extends AsyncTask<String, Void, ImageSearchResult> {
 
     private static final String TAG = ImageSearchTask.class.getSimpleName();
     private ImageSearchResultListener listener;
@@ -25,13 +25,20 @@ public class ImageSearchTask extends AsyncTask<String, Void, JSONObject> {
     }
 
     @Override
-    protected JSONObject doInBackground(String... params) {
+    protected ImageSearchResult doInBackground(String... params) {
         URL url = null;
         try {
             String query = URLEncoder.encode(params[0], "UTF-8");
+            StringBuilder buf = new StringBuilder("https://ajax.googleapis.com/ajax/services/search/images?");
+            buf.append("v=1.0&rsz=8&imgtype=photo")
+               .append("&q=").append(query)
+               .append("&userip=").append(InetAddress.getLocalHost());
 
-            url = new URL("https://ajax.googleapis.com/ajax/services/search/images?" +
-                    "v=1.0&rsz=8&q=" + query + "&userip=" + InetAddress.getLocalHost());
+            if (params.length > 1) {
+                buf.append("&start=").append(params[1]);
+            }
+            Log.d(TAG, "using google image search with" + buf.toString());
+            url = new URL(buf.toString());
 
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Referer", "localhost:8080");
@@ -42,8 +49,13 @@ public class ImageSearchTask extends AsyncTask<String, Void, JSONObject> {
             while((line = reader.readLine()) != null) {
                 builder.append(line);
             }
+            JSONObject root = new JSONObject(builder.toString());
 
-            return new JSONObject(builder.toString());
+            return new ImageSearchResult(
+                root.getJSONObject("responseData").getJSONArray("results"),
+                root.getJSONObject("responseData").getJSONObject("cursor").getJSONArray("pages"),
+                root.getJSONObject("responseData").getJSONObject("cursor").getInt("currentPageIndex")
+            );
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -57,7 +69,7 @@ public class ImageSearchTask extends AsyncTask<String, Void, JSONObject> {
     }
 
     @Override
-    protected void onPostExecute(JSONObject res) {
+    protected void onPostExecute(ImageSearchResult res) {
         try {
             listener.retrieveResult(res);
         } catch (JSONException e) {
@@ -66,6 +78,6 @@ public class ImageSearchTask extends AsyncTask<String, Void, JSONObject> {
     }
 
     public interface ImageSearchResultListener {
-        void retrieveResult(JSONObject result) throws JSONException;
+        void retrieveResult(ImageSearchResult result) throws JSONException;
     }
 }

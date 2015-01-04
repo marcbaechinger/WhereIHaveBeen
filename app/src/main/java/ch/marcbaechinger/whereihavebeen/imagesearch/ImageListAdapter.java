@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.fragments.UIUtils;
 
 /**
@@ -29,6 +30,11 @@ public class ImageListAdapter extends BaseAdapter {
     public ImageListAdapter(JSONArray imageSearchResult, Activity activity) {
         this.imageSearchResult = imageSearchResult;
         this.activity = activity;
+    }
+
+    public void setImageSearchResult(JSONArray results) {
+        this.imageSearchResult = results;
+        this.notifyDataSetChanged();
     }
 
     @Override
@@ -53,12 +59,10 @@ public class ImageListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView = null;
-        int width = UIUtils.getScreenWidth(activity) / 2;
+        int width = UIUtils.getScreenWidth(activity);
         if (convertView == null) {
             imageView = new ImageView(activity);
-            imageView.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            imageView.setLayoutParams(new LinearLayout.LayoutParams(width / 2, width / 2));
         } else {
             imageView = (ImageView) convertView;
         }
@@ -68,6 +72,8 @@ public class ImageListAdapter extends BaseAdapter {
             Picasso.with(activity)
                     .load(Uri.parse(image.getString("url")))
                     .resize(width, width)
+                    .placeholder(R.drawable.image_placeholder)
+                    .error(R.drawable.image_error_placeholder)
                     .centerCrop()
                     .into(imageView);
 

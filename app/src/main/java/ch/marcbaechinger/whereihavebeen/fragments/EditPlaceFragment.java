@@ -198,10 +198,9 @@ public class EditPlaceFragment extends Fragment {
 
         contentValues.put(DataContract.PLACE.FIELD_TITLE, title.getText().toString());
         editPlace.setTitle(title.getText().toString());
-        if (imageUri != null) {
-            contentValues.put(DataContract.PLACE.FIELD_PICTURE, imageUri.toString());
-            editPlace.setPictureUri(imageUri.toString());
-        }
+
+        contentValues.put(DataContract.PLACE.FIELD_PICTURE, editPlace.getPictureUri());
+
         contentValues.put(DataContract.PLACE.FIELD_CATEGORY, editPlace.getCategory().getId());
 
         if (editPlace.getLat() != null) {
@@ -317,6 +316,8 @@ public class EditPlaceFragment extends Fragment {
                 if(!ImageUtility.isCameraIntent(intent)) {
                     imageUri = intent.getData();
                 }
+
+                model.getEditPlace().setPictureUri(imageUri.toString());
 
                 try {
                     ImageUtility.setBitmapFromUri(imageUri, imageView, getActivity());
