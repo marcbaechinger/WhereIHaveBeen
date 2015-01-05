@@ -35,6 +35,7 @@ import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.CategorySelectionAdapter;
 import ch.marcbaechinger.whereihavebeen.app.ImageSearchActivity;
 import ch.marcbaechinger.whereihavebeen.app.MapActivity;
+import ch.marcbaechinger.whereihavebeen.app.ads.InterstitialHandler;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.model.Category;
 import ch.marcbaechinger.whereihavebeen.model.Place;
@@ -55,6 +56,7 @@ public class EditPlaceFragment extends Fragment {
     private View locationRow;
     private EditText title;
     private ImageView imageView;
+    private InterstitialHandler interstitialHandler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,7 +64,7 @@ public class EditPlaceFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_edit_place, container, false);
 
         model = UIModel.instance(getActivity());
-
+        interstitialHandler = new InterstitialHandler(getActivity(), true);
 
         Intent intent = getActivity().getIntent();
 
@@ -81,7 +83,7 @@ public class EditPlaceFragment extends Fragment {
                 try {
                     startImageInputIntent();
                 } catch (IOException e) {
-                    Log.e(TAG, e.getMessage(), e);
+                    e.printStackTrace();
                 }
             }
         });
@@ -124,8 +126,16 @@ public class EditPlaceFragment extends Fragment {
         if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_SEND)) {
             handleSendAction(intent);
         }
+
+        if (model.getSelectedPlace() != null) {
+            interstitialHandler.loadAd("travel", "location", model.getSelectedPlace().getTitle());
+        } else {
+            interstitialHandler.loadAd("travel", "location");
+        }
+
         return rootView;
     }
+
 
     @Override
     public void onResume() {
@@ -254,6 +264,8 @@ public class EditPlaceFragment extends Fragment {
         updateLatLng();
     }
 
+
+
     private void updateLatLng() {
         if (model.getEditPlace().getLat() != null) {
             latView.setText(model.getEditPlace().getLat().toString());
@@ -301,6 +313,10 @@ public class EditPlaceFragment extends Fragment {
 
 
     private void startImageInputIntent() throws IOException {
+
+        if (interstitialHandler.show()) {
+            return;
+        }
         final List<Intent> cameraIntents = new ArrayList<>();
         final Intent captureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         final PackageManager packageManager = getActivity().getPackageManager();

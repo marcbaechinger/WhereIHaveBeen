@@ -85,6 +85,9 @@
             android:name="ch.marcbaechinger.whereihavebeen.app.ImageSearchActivity"
             android:label="@string/title_activity_image_search" >
         </activity>
+        <activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
     </application>
 
 </manifest>
