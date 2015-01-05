@@ -73,5 +73,7 @@
     <string name="current_location">Current location</string>
     <string name="action_show_map">Show list on map</string>
     <string name="title_activity_image_search">Image search</string>
+    <string name="preference_file">preferences.xml</string>
+    <string name="pref_key_drawer_image_uri">pref_key_drawer_image_uri</string>
 
 </resources>

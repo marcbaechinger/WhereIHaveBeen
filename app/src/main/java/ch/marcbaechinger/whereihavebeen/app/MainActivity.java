@@ -1,8 +1,11 @@
 package ch.marcbaechinger.whereihavebeen.app;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -12,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toolbar;
 
@@ -20,12 +24,14 @@ import ch.marcbaechinger.whereihavebeen.adapter.CategoryAdapter;
 import ch.marcbaechinger.whereihavebeen.adapter.CategoryAdapterCallbacks;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.fragments.PlacesFragment;
+import ch.marcbaechinger.whereihavebeen.model.Place;
 import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
 
 public class MainActivity extends Activity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String KEY_PREF_DRAWER_IMAGE_URL = "KEY_PREF_DRAWER_IMAGE_URL";
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private CharSequence mTitle;
@@ -36,6 +42,7 @@ public class MainActivity extends Activity {
     private View leftDrawer;
     private View allLocationsItem;
     private Toolbar mToolbar;
+    private ImageView drawerImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +71,18 @@ public class MainActivity extends Activity {
         getLoaderManager().initLoader(0, null, new CategoryAdapterCallbacks(this, categoryAdapter));
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences sharedPref = this.getSharedPreferences
+                (getString(R.string.preference_file), Context.MODE_PRIVATE);
+        String imageUrl = sharedPref.getString(getString(R.string.pref_key_drawer_image_uri), null);
+        if (imageUrl != null) {
+            drawerImage.setImageURI(Uri.parse(imageUrl));
+        }
+    }
+
     private void setupDrawer() {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -81,6 +100,23 @@ public class MainActivity extends Activity {
         });
         mDrawerList.setAdapter(categoryAdapter);
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        drawerImage = (ImageView)findViewById(R.id.drawer_image);
+
+        drawerImage.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                Intent imageSearchIntent = new Intent(MainActivity.this, ImageSearchActivity.class);
+                imageSearchIntent.putExtra(ImageSearchActivity.IMAGE_QUERY, "Golden Gate Bridge at sunset");
+                imageSearchIntent.putExtra(ImageSearchActivity.URI_KEY, getString(R.string.pref_key_drawer_image_uri));
+
+                UIModel.instance(MainActivity.this).setEditPlace(new Place());
+                startActivity(imageSearchIntent);
+
+                return true;
+            }
+        });
 
         // between the sliding drawer and the action bar app icon
         mDrawerToggle = new ActionBarDrawerToggle(

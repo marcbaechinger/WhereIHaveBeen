@@ -49,6 +49,7 @@ public class ImageSearchFragment extends Fragment {
     private boolean queryVisible = false;
     private GridView grid;
     private BitmapStorageHelper storageHelper;
+    private ImageSelectionListener imageSelectionListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,7 +70,7 @@ public class ImageSearchFragment extends Fragment {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
 
                 Uri uri = storageHelper.store(bitmapDrawable.getBitmap(), new PlaceTileFilenameGenerator());
-                model.getEditPlace().setPictureUri(uri.toString());
+                imageSelectionListener.imageSelected(uri);
 
                 Log.d(TAG, "stored to " + uri.toString());
                 getActivity().finish();
@@ -183,4 +184,11 @@ public class ImageSearchFragment extends Fragment {
     }
 
 
+    public void setImageSelectionListener(ImageSelectionListener imageSelectionListener) {
+        this.imageSelectionListener = imageSelectionListener;
+    }
+
+    public ImageSelectionListener getImageSelectionListener() {
+        return imageSelectionListener;
+    }
 }

@@ -1,24 +1,52 @@
 package ch.marcbaechinger.whereihavebeen.app;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.fragments.ImageSearchFragment;
+import ch.marcbaechinger.whereihavebeen.fragments.ImageSelectionListener;
+import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
 public class ImageSearchActivity extends Activity {
 
     public static final String IMAGE_QUERY = "IMAGE_QUERY_TERM";
+    public static final String URI_KEY = "uri_key";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_search);
+
+        final String uriKey = getIntent().getStringExtra(URI_KEY);
+
         if (savedInstanceState == null) {
+            ImageSearchFragment imageSearchFragment = new ImageSearchFragment();
+            imageSearchFragment.setImageSelectionListener(new ImageSelectionListener() {
+                @Override
+                public void imageSelected(Uri uri) {
+                    if (uriKey == null) {
+                        if (uri == null) {
+                            UIModel.instance(ImageSearchActivity.this).getEditPlace().setPictureUri(null);
+                        } else {
+                            UIModel.instance(ImageSearchActivity.this).getEditPlace().setPictureUri(uri.toString());
+                        }
+                    } else {
+                        SharedPreferences sharedPref = ImageSearchActivity.this.getSharedPreferences
+                                (getString(R.string.preference_file), Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(uriKey, uri.toString());
+                        editor.commit();
+                    }
+                }
+            });
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new ImageSearchFragment())
+                    .add(R.id.container, imageSearchFragment)
                     .commit();
         }
 
