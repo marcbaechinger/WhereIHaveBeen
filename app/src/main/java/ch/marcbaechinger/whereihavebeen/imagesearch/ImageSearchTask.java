@@ -29,6 +29,9 @@ public class ImageSearchTask extends AsyncTask<String, Void, ImageSearchResult> 
         URL url = null;
         try {
             String query = URLEncoder.encode(params[0], "UTF-8");
+            if (query == null || query.trim().length() == 0) {
+                query = URLEncoder.encode("beautiful pictures", "UTF-8");
+            }
             StringBuilder buf = new StringBuilder("https://ajax.googleapis.com/ajax/services/search/images?");
             buf.append("v=1.0&rsz=8&imgtype=photo")
                .append("&q=").append(query)
@@ -50,7 +53,7 @@ public class ImageSearchTask extends AsyncTask<String, Void, ImageSearchResult> 
                 builder.append(line);
             }
             JSONObject root = new JSONObject(builder.toString());
-
+            Log.d(TAG, root.toString(4));
             return new ImageSearchResult(
                 root.getJSONObject("responseData").getJSONArray("results"),
                 root.getJSONObject("responseData").getJSONObject("cursor").getJSONArray("pages"),

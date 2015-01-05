@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
+import ch.marcbaechinger.whereihavebeen.app.tracking.TrackerManager;
 import ch.marcbaechinger.whereihavebeen.fragments.GMapFragment;
 
 public class MapActivity extends Activity {
@@ -19,6 +20,9 @@ public class MapActivity extends Activity {
                     .add(R.id.container, new GMapFragment())
                     .commit();
         }
+
+        TrackerManager manager = new TrackerManager();
+        manager.trackActivity(this, "Map");
     }
 
 

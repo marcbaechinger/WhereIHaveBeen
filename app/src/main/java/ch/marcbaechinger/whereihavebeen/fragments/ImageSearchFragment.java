@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.app.ImageSearchActivity;
+import ch.marcbaechinger.whereihavebeen.app.PreferenceManager;
 import ch.marcbaechinger.whereihavebeen.bitmap.BitmapStorageHelper;
 import ch.marcbaechinger.whereihavebeen.bitmap.OutputMediaFileFactory;
 import ch.marcbaechinger.whereihavebeen.bitmap.PlaceTileFilenameGenerator;
@@ -51,6 +52,8 @@ public class ImageSearchFragment extends Fragment {
     private BitmapStorageHelper storageHelper;
     private ImageSelectionListener imageSelectionListener;
 
+    PreferenceManager preferenceManager;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,6 +61,7 @@ public class ImageSearchFragment extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_image_search, container, false);
         final UIModel model = UIModel.instance(getActivity());
 
+        preferenceManager = new PreferenceManager(getActivity());
         grid = (GridView) rootView.findViewById(R.id.grid);
         storageHelper = new BitmapStorageHelper(getActivity(), new OutputMediaFileFactory(getActivity()));
 
@@ -171,6 +175,8 @@ public class ImageSearchFragment extends Fragment {
                 pageCounter.setText( (searchResult.getCurrentPage() + 1 ) + "/" + searchResult.getMatches().length());
             }
         }).execute(query, String.valueOf(start));
+
+        preferenceManager.writeStringProperty(R.string.pref_key_last_search_query, query);
     }
 
     private boolean hasNextPage() {

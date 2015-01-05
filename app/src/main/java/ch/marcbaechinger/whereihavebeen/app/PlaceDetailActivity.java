@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toolbar;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
+import ch.marcbaechinger.whereihavebeen.app.tracking.TrackerManager;
 import ch.marcbaechinger.whereihavebeen.fragments.PlaceDetailFragment;
 
 
@@ -23,6 +24,9 @@ public class PlaceDetailActivity extends Activity {
 
         getWindow().setAllowEnterTransitionOverlap(true);
         setupToolbar();
+
+        TrackerManager manager = new TrackerManager();
+        manager.trackActivity(this, "Place detail");
     }
 
     private void setupToolbar() {

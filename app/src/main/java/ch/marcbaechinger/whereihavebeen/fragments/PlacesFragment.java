@@ -24,18 +24,8 @@ import ch.marcbaechinger.whereihavebeen.model.Category;
 import ch.marcbaechinger.whereihavebeen.model.ModelListener;
 import ch.marcbaechinger.whereihavebeen.model.Place;
 import ch.marcbaechinger.whereihavebeen.model.UIModel;
-import ch.marcbaechinger.whereihavebeen.swipe.SwipeDismissListViewTouchListener;
 
 public class PlacesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, ModelListener {
-
-    private static final String[] PROJECTION = new String[]{
-            DataContract.PLACE.FIELD_ID,
-            DataContract.PLACE.TABLE + "." + DataContract.PLACE.FIELD_TITLE,
-            DataContract.PLACE.FIELD_DESCRIPTION,
-            DataContract.PLACE.FIELD_PICTURE,
-            DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_TITLE,
-            DataContract.CATEGORY.TABLE + "." + DataContract.CATEGORY.FIELD_COLOR
-    };
 
     private PlaceAdapter listViewAdapter;
     private UIModel model;
@@ -69,71 +59,16 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
         placesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int pos, long index) {
-                Intent detailIntent = new Intent(getActivity(), PlaceDetailActivity.class);
-
-                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle();
-
-                ActivityOptions options = ActivityOptions
-                    .makeSceneTransitionAnimation(getActivity(),
-                            new Pair<>(view.findViewById(R.id.placeListViewItemImage), "tile"));
-
-                detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(pos));
-                model.setSelectedPlace((Place) view.getTag(R.id.placeTag));
-
-                startActivity(detailIntent, options.toBundle());
+                startPlaceActivity(view, PlaceDetailActivity.class, false);
             }
         });
-
         placesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Intent detailIntent = new Intent(getActivity(), EditPlaceActivity.class);
-
-                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle();
-
-                ActivityOptions options = ActivityOptions
-                        .makeSceneTransitionAnimation(getActivity(),
-                                new Pair<>(view.findViewById(R.id.placeListViewItemImage), "tile"));
-
-                detailIntent.putExtra(Intent.EXTRA_UID, adapterView.getItemIdAtPosition(position));
-                Place place = (Place) view.getTag(R.id.placeTag);
-                model.setSelectedPlace(place);
-                model.setEditPlace((Place) place.clone());
-
-                startActivity(detailIntent, options.toBundle());
+                startPlaceActivity(view, EditPlaceActivity.class, true);
                 return true;
             }
         });
-
-        SwipeDismissListViewTouchListener touchListener =
-                new SwipeDismissListViewTouchListener(
-                        placesListView,
-                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
-                            @Override
-                            public boolean canDismiss(int position) {
-                                return true;
-                            }
-
-                            @Override
-                            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                                for (int position : reverseSortedPositions) {
-                                    Cursor cursor = listViewAdapter.getCursor();
-                                    if (cursor.moveToPosition(reverseSortedPositions[0])) {
-                                        String id = cursor.getString(cursor.getColumnIndex(DataContract.PLACE.FIELD_ID));
-                                        getActivity().getContentResolver().delete(
-                                                DataContract.PLACE.CONTENT_URI,
-                                                DataContract.PLACE.FIELD_ID + " = ?",
-                                                new String[]{id}
-                                        );
-                                        getLoaderManager().restartLoader(0, null, PlacesFragment.this);
-                                    }
-                                }
-                            }
-                        });
-        placesListView.setOnTouchListener(touchListener);
-        // Setting this scroll listener is required to ensure that during ListView scrolling,
-        // we don't look for swipes.
-        placesListView.setOnScrollListener(touchListener.makeScrollListener());
 
         model.setSelectedPlace(null);
         model.addDeletionListener(this);
@@ -172,7 +107,7 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
             selectionArgs = new String[]{category.getTitle()};
         }
         return new CursorLoader(getActivity(), DataContract.PLACE.CONTENT_URI,
-                PROJECTION, null, selectionArgs, null);
+                DataContract.PLACE.VIEW_PROJECTION, null, selectionArgs, null);
     }
 
     @Override
@@ -193,5 +128,19 @@ public class PlacesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onCategorySelection(Category category) {
         getLoaderManager().restartLoader(0, null, this);
+    }
+
+    private void startPlaceActivity(View targetView, Class<?> activityClass, boolean editMode) {
+        Intent detailIntent = new Intent(getActivity(), activityClass);
+
+        ActivityOptions options = ActivityOptions
+                .makeSceneTransitionAnimation(getActivity(),
+                        new Pair<>(targetView.findViewById(R.id.placeListViewItemImage), "tile"));
+
+        model.setSelectedPlace((Place) targetView.getTag(R.id.placeTag));
+        if (editMode) {
+            model.setEditPlace((Place) model.getSelectedPlace().clone());
+        }
+        startActivity(detailIntent, options.toBundle());
     }
 }

@@ -9,6 +9,7 @@ import android.widget.Toolbar;
 import com.google.android.gms.maps.GoogleMap;
 
 import app.ch.marcbaechinger.whereihavebeen.R;
+import ch.marcbaechinger.whereihavebeen.app.tracking.TrackerManager;
 import ch.marcbaechinger.whereihavebeen.fragments.EditPlaceFragment;
 import ch.marcbaechinger.whereihavebeen.fragments.ImageUtility;
 
@@ -31,8 +32,10 @@ public class EditPlaceActivity extends Activity {
 
         getWindow().setAllowEnterTransitionOverlap(true);
         setActionBar((Toolbar) findViewById(R.id.toolbar));
-    }
 
+        TrackerManager manager = new TrackerManager();
+        manager.trackActivity(this, "Edit place");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

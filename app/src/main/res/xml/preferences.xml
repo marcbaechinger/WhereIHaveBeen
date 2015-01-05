@@ -5,4 +5,8 @@
         android:key="@string/pref_key_drawer_image_uri"
         android:summary="drawer image uri"
         android:title="drawer image uri" />
+    <Preference
+        android:key="@string/pref_key_last_search_query"
+        android:summary="last search query"
+        android:title="last search query" />
 </PreferenceScreen>

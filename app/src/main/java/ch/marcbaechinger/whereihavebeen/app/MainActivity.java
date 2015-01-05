@@ -19,10 +19,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toolbar;
 
+import com.google.android.gms.analytics.Tracker;
+
 import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.CategoryAdapter;
 import ch.marcbaechinger.whereihavebeen.adapter.CategoryAdapterCallbacks;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
+import ch.marcbaechinger.whereihavebeen.app.tracking.TrackerManager;
 import ch.marcbaechinger.whereihavebeen.fragments.PlacesFragment;
 import ch.marcbaechinger.whereihavebeen.model.Place;
 import ch.marcbaechinger.whereihavebeen.model.UIModel;
@@ -43,6 +46,10 @@ public class MainActivity extends Activity {
     private View allLocationsItem;
     private Toolbar mToolbar;
     private ImageView drawerImage;
+    PreferenceManager preferenceManager;
+
+    private Tracker tracker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +63,7 @@ public class MainActivity extends Activity {
                     .commit();
         }
 
+        preferenceManager = new PreferenceManager(MainActivity.this);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         leftDrawer = findViewById(R.id.left_drawer);
         mDrawerList = (ListView) findViewById(R.id.categoryList);
@@ -69,6 +77,9 @@ public class MainActivity extends Activity {
 
         selectItem(-1);
         getLoaderManager().initLoader(0, null, new CategoryAdapterCallbacks(this, categoryAdapter));
+
+        TrackerManager manager = new TrackerManager();
+        manager.trackActivity(this, "Main screen");
     }
 
 
@@ -108,7 +119,9 @@ public class MainActivity extends Activity {
             public boolean onLongClick(View v) {
 
                 Intent imageSearchIntent = new Intent(MainActivity.this, ImageSearchActivity.class);
-                imageSearchIntent.putExtra(ImageSearchActivity.IMAGE_QUERY, "Golden Gate Bridge at sunset");
+
+                String query = preferenceManager.getStringProperty(R.string.pref_key_last_search_query, "Golden Gate Bridge at sunset");
+                imageSearchIntent.putExtra(ImageSearchActivity.IMAGE_QUERY, query);
                 imageSearchIntent.putExtra(ImageSearchActivity.URI_KEY, getString(R.string.pref_key_drawer_image_uri));
 
                 UIModel.instance(MainActivity.this).setEditPlace(new Place());

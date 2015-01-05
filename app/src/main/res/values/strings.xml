@@ -75,5 +75,9 @@
     <string name="title_activity_image_search">Image search</string>
     <string name="preference_file">preferences.xml</string>
     <string name="pref_key_drawer_image_uri">pref_key_drawer_image_uri</string>
+    <string name="pref_key_last_search_query" >pref_key_last_search_query</string>
+
+    <string name="app_tracking_id">UA-58238409-3</string>
+    <string name="interstitial_ad_unit_id">ca-app-pub-6982139545787329/7790581899</string>
 
 </resources>

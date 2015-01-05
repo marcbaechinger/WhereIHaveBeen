@@ -8,7 +8,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import app.ch.marcbaechinger.whereihavebeen.R;
+import ch.marcbaechinger.whereihavebeen.app.tracking.TrackerManager;
 import ch.marcbaechinger.whereihavebeen.fragments.ImageSearchFragment;
 import ch.marcbaechinger.whereihavebeen.fragments.ImageSelectionListener;
 import ch.marcbaechinger.whereihavebeen.model.UIModel;
@@ -50,6 +54,10 @@ public class ImageSearchActivity extends Activity {
                     .commit();
         }
 
+        TrackerManager manager = new TrackerManager();
+        Map<String, String> map = new HashMap<>();
+        map.put("mode", uriKey == null ? "place" : uriKey);
+        manager.trackActivity(this, "Image search", map);
     }
 
 
