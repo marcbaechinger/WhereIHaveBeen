@@ -35,13 +35,14 @@ import app.ch.marcbaechinger.whereihavebeen.R;
 import ch.marcbaechinger.whereihavebeen.adapter.CategorySelectionAdapter;
 import ch.marcbaechinger.whereihavebeen.app.ImageSearchActivity;
 import ch.marcbaechinger.whereihavebeen.app.MapActivity;
+import ch.marcbaechinger.whereihavebeen.app.ads.AdCloseListener;
 import ch.marcbaechinger.whereihavebeen.app.ads.InterstitialHandler;
 import ch.marcbaechinger.whereihavebeen.app.data.DataContract;
 import ch.marcbaechinger.whereihavebeen.model.Category;
 import ch.marcbaechinger.whereihavebeen.model.Place;
 import ch.marcbaechinger.whereihavebeen.model.UIModel;
 
-public class EditPlaceFragment extends Fragment {
+public class EditPlaceFragment extends Fragment implements AdCloseListener {
 
     public static final int PICTURE_REQUEST = 1001;
     private static final String TAG = EditPlaceFragment.class.getName();
@@ -136,13 +137,13 @@ public class EditPlaceFragment extends Fragment {
         return rootView;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
         if (model.getEditPlace() != null) {
             syncUI(model.getEditPlace());
         }
+        updateLatLng();
     }
 
     @Override
@@ -258,14 +259,6 @@ public class EditPlaceFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateLatLng();
-    }
-
-
-
     private void updateLatLng() {
         if (model.getEditPlace().getLat() != null) {
             latView.setText(model.getEditPlace().getLat().toString());
@@ -314,7 +307,7 @@ public class EditPlaceFragment extends Fragment {
 
     private void startImageInputIntent() throws IOException {
 
-        if (interstitialHandler.show()) {
+        if (interstitialHandler.show(this)) {
             return;
         }
         final List<Intent> cameraIntents = new ArrayList<>();
@@ -366,6 +359,15 @@ public class EditPlaceFragment extends Fragment {
             }
         } else {
             super.onActivityResult(requestCode, resultCode, intent);
+        }
+    }
+
+    @Override
+    public void onClose() {
+        try {
+            startImageInputIntent();
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage(), e);
         }
     }
 }

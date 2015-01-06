@@ -2,6 +2,7 @@ package ch.marcbaechinger.whereihavebeen.app.ads;
 
 import android.app.Activity;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 
@@ -14,6 +15,7 @@ public class InterstitialHandler {
 
 
     private boolean interstitialShown;
+    private AdCloseListener adCloseListener;
 
     public InterstitialHandler(Activity activity, boolean onceOnly) {
         this.activity = activity;
@@ -24,9 +26,19 @@ public class InterstitialHandler {
 
     public void loadAd(String... keyword) {
         AdRequest.Builder builder = new AdRequest.Builder();
+        builder.addTestDevice(AdRequest.DEVICE_ID_EMULATOR);
         for (String kw : keyword) {
             builder.addKeyword(kw);
         }
+        interstitial.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                if (adCloseListener != null) {
+                    adCloseListener.onClose();
+                }
+                super.onAdClosed();
+            }
+        });
         interstitial.loadAd(builder.build());
     }
 
@@ -37,6 +49,11 @@ public class InterstitialHandler {
             return true;
         }
         return false;
+    }
+
+    public boolean show(AdCloseListener adCloseListener) {
+        this.adCloseListener = adCloseListener;
+        return show();
     }
 
     public boolean isInterstitialShown() {
